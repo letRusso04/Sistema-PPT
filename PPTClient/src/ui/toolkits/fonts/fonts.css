@@ -1,0 +1,51 @@
+
+@font-face{
+    font-family: 'nucleo';
+    src: local('nucleo'), url(../../../application/Assets/font/nucleo.woff) format('woff');
+}
+
+
+@font-face{
+    font-family: 'central2';
+    src: local('central2'), url(../../../application/Assets/font/CentraNo2-Bold.ttf) format('truetype');
+}
+
+
+@font-face{
+    font-family: 'gramatic1';
+    src: local('gramatic1'), url(../../../application/Assets/font/CentraNo2-Bold.ttf) format('truetype');
+}
+
+@font-face{
+    font-family: 'gramatic2';
+    src: local('gramatic2'), url(../../../application/Assets/font/CentraNo2-Book.ttf) format('truetype');
+}
+@font-face{
+    font-family: 'gramatic3';
+    src: local('gramatic3'), url(../../../application/Assets/font/Gramatika-Black.ttf) format('truetype');
+}
+
+@font-face{
+    font-family: 'gramatic4';
+    src: local('gramatic4'), url(../../../application/Assets/font/Gramatika-Regular.ttf) format('truetype');
+}
+@font-face{
+    font-family: 'Robotoblack';
+    src: local('Robotoblack'), url(../../../application/Assets/font/Roboto/Roboto-Black.ttf) format('truetype');
+}
+@font-face{
+    font-family: 'Robotobold';
+    src: local('Robotobold'), url(../../../application/Assets/font/Roboto/Roboto-Bold.ttf) format('truetype');
+}
+@font-face{
+    font-family: 'Robotoregular';
+    src: local('Robotoregular'), url(../../../application/Assets/font/Roboto/Roboto-Regular.ttf) format('truetype');
+}
+@font-face{
+    font-family: 'Robotomedium';
+    src: local('Robotomedium'), url(../../../application/Assets/font/Roboto/Roboto-Medium.ttf) format('truetype');
+}
+@font-face{
+    font-family: 'Robotothin';
+    src: local('Robotothin'), url(../../../application/Assets/font/Roboto/Roboto-Thin.ttf) format('truetype');
+}
