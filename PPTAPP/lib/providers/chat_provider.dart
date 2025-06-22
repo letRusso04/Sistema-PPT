@@ -56,20 +56,59 @@ class ChatProvider extends ChangeNotifier {
   Future<void> fetchMembers() async {
     try {
       final url = Uri.parse('$baseUrl/miembros/llamar');
-      final response = await http.post(url).timeout(Duration(seconds: 10));
+      final res = await http.post(url).timeout(const Duration(seconds: 10));
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        _members.clear();
-        _members.addAll(data.map((d) => Member.fromList(d)).toList());
-        notifyListeners();
-      } else {
-        throw Exception('Error cargando miembros: ${response.statusCode}');
+      if (res.statusCode != 200) {
+        throw Exception('Status ${res.statusCode}');
       }
+
+      final data = jsonDecode(res.body);
+      if (data is! List) throw Exception('La API no devolvió una lista');
+
+      _members
+        ..clear()
+        ..addAll(data.map<Member>((item) {
+          // Caso Map -----------------------------
+          if (item is Map<String, dynamic>) {
+            return Member(
+              id: item['id'].toString(),
+              name: item['nombre'] ?? 'Sin nombre',
+              avatarPath: _buildAvatarPath(item['foto']),
+            );
+          }
+
+          // Caso List ----------------------------
+          if (item is List && item.length >= 3) {
+            final int last = item.length - 1; // último índice válido
+            final avatar = (item[last] ?? '').toString();
+            return Member(
+              id: item[0].toString(),
+              name: item[2].toString(),
+              avatarPath: _buildAvatarPath(avatar),
+            );
+          }
+
+          // Formato inesperado -------------------
+          if (kDebugMode) print('Item desconocido: $item');
+          return Member(
+            id: '0',
+            name: 'Desconocido',
+            avatarPath: 'assets/images/PPTLogo.png',
+          );
+        }).toList());
+
+      notifyListeners();
     } catch (e) {
       if (kDebugMode) print('Error en fetchMembers: $e');
       rethrow;
     }
+  }
+
+  String _buildAvatarPath(String? avatar) {
+    if (avatar != null && avatar.isNotEmpty && avatar != 'false') {
+      return '$baseUrl/avatars/$avatar';
+    }
+    return 'assets/images/PPTLogo.png';
   }
 }
 
