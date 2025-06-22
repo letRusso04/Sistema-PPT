@@ -59,7 +59,7 @@ PROXIMAMENTE
 
 ---
 
-### 💻 Frontend Web (Flutter Web)
+### 💻 Frontend Web (React&Electron Web)
 
 ```bash
 CD PPTClient 
