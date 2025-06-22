@@ -12,10 +12,7 @@ from index import app
 Invoca la clases de cada controlador, trae cada metodo que pertenecen a las rutas.
 """
 from Controllers.authController import AuthControllers
-from Controllers.businessController import BusinessControllers
-from Controllers.productsController import ProductsControllers
 from Controllers.memberController import MemberControllers
-from Controllers.clientController import ClientControllers
 from Controllers.messageController import MessageControllers
 """
 Rutas principales de autenticacion del usuario. 
@@ -80,6 +77,29 @@ async def CallMemberBusiness():
     return await MemberControllers.controllerCallMember()
 
 
+@app.route('/miembros/aprobar',methods=['POST'])
+async def NewPromise():
+    iduser = request.json['iduser']
+    return await MemberControllers.controllerAcceptMember(iduser)
+
+@app.route('/miembros/eliminar',methods=['POST'])
+async def LeftOutBusiness():
+    iduser = request.json['iduser']
+    return await MemberControllers.controllerKickMember(iduser)
+
+@app.route('/miembros/actualizar',methods=['POST'])
+async def UpdateMembers():
+    data = request.get_json()
+    iduser    = data.get('id')
+    rol       = data.get('rol')
+    correo    = data.get('correo')
+    cedula    = data.get('cedula')
+    estado    = data.get('estado')
+    ubicacion = data.get('ubicacion')
+    telefono  = data.get('telefono')
+    return await MemberControllers.controllerChangeMember(iduser, rol, correo, cedula, estado, ubicacion, telefono)
+
+
 """
 Rutas coherentes a los mensajes de la aplicacion.
 """
@@ -112,122 +132,4 @@ async def SearchMessages():
     return await MessageControllers.controllerSearchMessage(UserId, UserFriend)
 
 
-@app.route('/miembros/permisos',methods=['POST'])
-async def NewPromise():
-    idBusiness = request.json['idBusiness']
-    idUser = request.json['idUser']
-    selectedOption = request.json['selectedOption']
-    return await MemberControllers.controllerPermissionsMember(idBusiness, idUser, selectedOption)
-@app.route('/miembros/expulsar',methods=['POST'])
-async def LeftOutBusiness():
-    idBusiness = request.json['idBusiness']
-    sendUserId = request.json['sendUserId']
-    return await MemberControllers.controllerKickMember(idBusiness, sendUserId)
-@app.route('/miembros/busqueda', methods=['POST'])
-async def CallUser():
-    searchUser = request.json['searchUser']
-    userId = request.json['userId']
-    return await MemberControllers.controllerSearchMember(searchUser, userId)
-    
-@app.route('/miembros/invitar/amigos', methods=['POST'])
-async def InviteUser():
-    userId = request.json['userId']    
-    userIdInvite = request.json['UserIdInvite']
-    inviteType = request.json['InviteType']
-    inviteStatus = 1
-    return await MemberControllers.controllerInviteMember(userId, userIdInvite, inviteType, inviteStatus)
-@app.route('/miembros/invitar/tienda', methods=['POST'])
-async def InviteUserBusiness():
 
-    idBusiness = request.json['getIdBusiness']
-    userId = request.json['userId']    
-    userIdInvite = request.json['UserIdInvite']
-    inviteType = request.json['InviteType']
-    inviteStatus = 1;
-    return await MemberControllers.controllerInviteBusinessMember(idBusiness, userId, userIdInvite, inviteType, inviteStatus)
-@app.route('/miembros/busqueda/invitaciones', methods=['POST'])
-async def SearchInvitesUser():
-    getUserInvite = request.json['userId']
-    return await MemberControllers.controllerSearchInvitesMember(getUserInvite)
-@app.route('/miembros/eliminar/invitaciones/amigos', methods=['POST'])
-async def DeleteInvitesUser():
-    getUserByInvite = request.json['userId']
-    getUserToInvite = request.json['userInviteId']
-    return await MemberControllers.controllerDeleteInvitesMember(getUserByInvite, getUserToInvite)
-@app.route('/miembros/eliminar/invitaciones/negocio', methods=['POST'])
-async def DeleteInviteBusiness():
-    getUserByInvite = request.json['userId']
-    idNegocio = request.json['idNegocio']
-    return await MemberControllers.controllerDeleteInvitesBusiness(getUserByInvite, idNegocio)
-@app.route('/miembros/aceptar/invitaciones/amigos', methods=['POST'])
-async def AcceptInvitesUser():
-    getUserByInvite = request.json['userId']
-    getUserToInvite = request.json['userInviteId']
-    return await MemberControllers.controllerAcceptInvitesMember(getUserByInvite, getUserToInvite)
-@app.route('/miembros/aceptar/invitaciones/negocio', methods=['POST'])
-async def AcceptInviteBusiness():
-    getUserByInvite = request.json['userId']
-    idNegocio = request.json['idNegocio']
-    return await MemberControllers.controllerAcceptInvitesBusiness(getUserByInvite, idNegocio)
-@app.route('/miembros/busqueda/amigos', methods=['POST'])
-async def SearchFriendList():
-    getUserInvite = request.json['userId']
-    return await MemberControllers.controllerSearchListFriend(getUserInvite)
-@app.route('/miembros/obtener/nombre', methods=['POST'])
-async def LoadName():
-    userFriend = request.json['UserFriend']
-    return await MemberControllers.controllerLoadName(userFriend)
-@app.route('/miembros/permisos/observar', methods=['POST'])
-async def SearchPassword():
-    # Solo pass
-    idUser = request.json['idUser'] 
-    return await MemberControllers.controllerViewData(idUser)
-@app.route('/miembros/permisos/cambiar', methods=['POST'])
-async def ChangePassword():
-    #Solo Pass
-    idUser = request.json['idUser'] 
-    newPassword = request.json['newPassword']   
-    return await MemberControllers.controllerChangeData(idUser, newPassword)
-
-"""
-Rutas coherentes a los clientes de los negocios de la aplicacion.
-"""
-@app.route('/cliente/cambiar',methods=['POST'])
-async def ChangeClient():
-    idClient = request.json['idClient']
-    name = request.json['name']
-    address = request.json['address']
-    cid = request.json['cid']
-    phone = request.json['phone']
-    return await ClientControllers.controllerChangeClient(idClient,name, address, cid, phone)
-
-@app.route('/cliente/borrar',methods=['POST'])
-async def DeleteClient():
-    idClient = request.json['idClient']
-    return await ClientControllers.controllerDeleteClient(idClient)
-
-@app.route('/cliente/crear', methods=['POST'])
-async def CreateClient():    
-    idBusiness = request.json['idBusiness']
-    name = request.json['name']
-    address = request.json['address']
-    cid = request.json['cid']
-    phone = request.json['phone']
-    idAccount = request.json['idAccount']
-    return await ClientControllers.controllerCreateClient(idBusiness, name, address, cid, phone, idAccount)
-@app.route('/cliente/llamar', methods=['POST'])
-async def CallClient():
-    idBusiness = request.json['idBusiness']
-    return await ClientControllers.controllerCallClient(idBusiness)
-
-@app.route('/cliente/llamar/unico', methods=['POST'])
-async def CallClientID():
-    idClient = request.json['idClient']
-    idBusiness = request.json['idBusiness']
-    return await ClientControllers.controllerCallIDClient(idClient, idBusiness)
-
-@app.route('/cliente/buscar', methods=['POST'])
-async def SearchClient():
-    IdBusiness = request.json['idBusiness']
-    nameSearch = request.json['nameSearch']
-    return await ClientControllers.controllerSearchClient(IdBusiness, nameSearch)

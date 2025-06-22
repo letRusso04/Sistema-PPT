@@ -3,44 +3,48 @@ class MemberControllers:
     async def controllerCallMember():
         return await MemberModel.modelCallMember()
 
-    async def controllerPermissionsMember(idBusiness, idUser, selectedOption):
-        await MemberModel.modelPermissionsMember(idBusiness, idUser, selectedOption)
+    async def controllerAcceptMember(iduser):
+        return await MemberModel.modelAcceptMember(iduser)
 
-    async def controllerKickMember(idBusiness, sendUserId):
-        await MemberModel.modelKickMember(idBusiness, sendUserId)
+    async def controllerKickMember(iduser):
+        return await MemberModel.modelKickMember(iduser)
 
-    async def controllerSearchMember(searchUser, userId):
-       await MemberModel.modelSearchMember(searchUser, userId)
+    async def controllerChangeMember(iduser, rol, correo, cedula, estado, ubicacion, telefono):
+        return await MemberModel.modelChangeMember(iduser, rol, correo, cedula, estado, ubicacion, telefono)
 
-    async def controllerInviteMember(userId, userIdInvite, inviteType, inviteStatus):
-        await MemberModel.modelInviteMember(userId, userIdInvite, inviteType, inviteStatus)
+# ##
+#     async def controllerSearchMember(searchUser, userId):
+#        await MemberModel.modelSearchMember(searchUser, userId)
 
-    async def controllerInviteBusinessMember(idBusiness, userId, userIdInvite, inviteType, inviteStatus): 
-        await MemberModel.modelInviteBusinessMember(idBusiness, userId, userIdInvite, inviteType, inviteStatus)
+#     async def controllerInviteMember(userId, userIdInvite, inviteType, inviteStatus):
+#         await MemberModel.modelInviteMember(userId, userIdInvite, inviteType, inviteStatus)
 
-    async def controllerSearchInvitesMember(getUserInvite):
-        await MemberModel.modelSearchInvitesMember(getUserInvite)
+#     async def controllerInviteBusinessMember(idBusiness, userId, userIdInvite, inviteType, inviteStatus): 
+#         await MemberModel.modelInviteBusinessMember(idBusiness, userId, userIdInvite, inviteType, inviteStatus)
 
-    async def controllerDeleteInvitesMember(getUserByInvite, getUserToInvite):
-        await MemberModel.modelDeleteInvitesMember(getUserByInvite, getUserToInvite)
+#     async def controllerSearchInvitesMember(getUserInvite):
+#         await MemberModel.modelSearchInvitesMember(getUserInvite)
 
-    async def controllerDeleteInvitesBusiness(getUserByInvite, idNegocio):
-        await MemberModel.modelDeleteInvitesBusiness(getUserByInvite, idNegocio)
+#     async def controllerDeleteInvitesMember(getUserByInvite, getUserToInvite):
+#         await MemberModel.modelDeleteInvitesMember(getUserByInvite, getUserToInvite)
 
-    async def controllerAcceptInvitesMember(getUserByInvite, getUserToInvite):
-        await MemberModel.modelAcceptInvitesMember(getUserByInvite, getUserToInvite)
+#     async def controllerDeleteInvitesBusiness(getUserByInvite, idNegocio):
+#         await MemberModel.modelDeleteInvitesBusiness(getUserByInvite, idNegocio)
 
-    async def controllerAcceptInvitesBusiness(getUserByInvite, idNegocio):
-        await MemberModel.modelAcceptInvitesBusiness(getUserByInvite, idNegocio)
+#     async def controllerAcceptInvitesMember(getUserByInvite, getUserToInvite):
+#         await MemberModel.modelAcceptInvitesMember(getUserByInvite, getUserToInvite)
 
-    async def controllerSearchListFriend(getUserInvite):
-        await MemberModel.modelSearchListFriend(getUserInvite)
+#     async def controllerAcceptInvitesBusiness(getUserByInvite, idNegocio):
+#         await MemberModel.modelAcceptInvitesBusiness(getUserByInvite, idNegocio)
 
-    async def controllerLoadName(userFriend):
-        await MemberModel.modelLoadName(userFriend)
+#     async def controllerSearchListFriend(getUserInvite):
+#         await MemberModel.modelSearchListFriend(getUserInvite)
+
+#     async def controllerLoadName(userFriend):
+#         await MemberModel.modelLoadName(userFriend)
         
-    async def controllerViewData(idUser):
-        await MemberModel.modelViewData(idUser)
+#     async def controllerViewData(idUser):
+#         await MemberModel.modelViewData(idUser)
 
-    async def controllerChangeData(idUser, newPassword):
-        await MemberModel.modelChangeData(idUser, newPassword)
+#     async def controllerChangeData(idUser, newPassword):
+#         await MemberModel.modelChangeData(idUser, newPassword)
