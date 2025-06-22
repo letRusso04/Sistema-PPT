@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 app = Flask(__name__)
-CORS(app, resources={"/*":{"origins": "http://localhost:3000"}})
+CORS(app, resources={"/*":{"origins": "*"}})
+# http://localhost:3000 se debe cambiar luego * por la ruta 3000, apertura * para testear por curl
 app.secret_key = 'IsAdamAligheri'
 
 from routes.danRouters import *

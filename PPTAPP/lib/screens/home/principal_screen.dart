@@ -109,7 +109,6 @@ class _LeftDrawer extends StatelessWidget {
           ),
           _tile('Principal', '/', style),
           _tile('Verificacion', '/verificacion', style),
-          _tile('Grupos', '/grupos', style),
           _tile('Auditoría', '/auditoria', style),
           _tile('Eventos', '/eventos', style),
         ],

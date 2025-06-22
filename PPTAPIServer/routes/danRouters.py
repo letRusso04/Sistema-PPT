@@ -1,4 +1,8 @@
-from flask import request
+from flask import Blueprint, request, jsonify, current_app, send_from_directory
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from werkzeug.utils import secure_filename
+import os, uuid
+
 """
 Trae el "app" construido desde el index, donde se le asignan las rutas que va a contener.
 """
@@ -17,6 +21,17 @@ from Controllers.messageController import MessageControllers
 Rutas principales de autenticacion del usuario. 
 Para funcionar correctamente, se recomienda installar flask[async].
 """
+@app.route('/registro', methods=['POST'])
+async def RegisterUser():
+    print("llamando a registro")
+    email = request.json['email']
+    nombre = request.json['name']
+    password = request.json['password']
+    cedula = request.json['cedula']
+    ubicacion = request.json['ubicacion']
+    estado = request.json['estado']
+    telefono = request.json['telefono']
+    return await AuthControllers.controllerRegister(email, nombre, cedula, password, ubicacion, estado, telefono)
 
 @app.route('/inicio', methods=['POST'])
 async def routerAuth():
@@ -24,31 +39,46 @@ async def routerAuth():
     password= request.json['password']
     return await AuthControllers.controllerAuth(email, password)
 
-@app.route('/registro', methods=['POST'])
-async def RegisterUser():
-    email = request.json['email']
-    name = request.json['name']
-    businessName = request.json['businessName']
-    password = request.json['password']
-    iduser =  request.json['id']
-    return await AuthControllers.controllerRegister(email, name, businessName, password, iduser)
 
-@app.route('/cuenta/registro', methods=['POST'])
-async def RegisterAccount():
-    globalUser = request.json['globalUser']
-    name = request.json['name']
-    number = request.json['number']
-    password = request.json['password']
-    selectedOption = request.json['selectedOption']
-    timeDesing = request.json['timeDesing']
-    iduser =  request.json['id']
-    userIdSQL =  request.json['userId']
-    return await AuthControllers.controllerAccount(globalUser, name, number, password, selectedOption, timeDesing, iduser, userIdSQL)
+@app.route('/cambiarcontra', methods=['POST'])
+async def routerCPassword():
+    iduser= request.json['iduser']
+    contranueva= request.json['contranueva']
+    contravieja= request.json['contravieja']
+    return await AuthControllers.controllerChangePassword(iduser, contranueva, contravieja)
 
-@app.route('/cuenta/llamar', methods=['POST'])
-async def callAccount():
-    clientID =  request.json['clientID']
-    return await AuthControllers.controllerCallListUser(clientID)
+@app.route('/avatar/change', methods=['POST'])
+async def avatarsChanges():
+    if 'avatar' not in request.files:
+        return {'error': 'archivo faltante'}, 400
+    img = request.files['avatar']
+    user_id = request.form.get('iduser')
+    ext = os.path.splitext(img.filename)[1]
+    filename = f"{user_id}{ext}"
+    save_dir = os.path.join(current_app.instance_path, 'uploads', 'avatars')
+    os.makedirs(save_dir, exist_ok=True)
+    img.save(os.path.join(save_dir, filename))
+    return await AuthControllers.controllerChangeImage(filename, user_id)
+
+# Avatars del usuario 
+@app.route('/avatars/<filename>')
+def serve_avatar(filename):
+    avatar_folder = os.path.join(current_app.instance_path, 'uploads', 'avatars')
+    print(avatar_folder)
+    return send_from_directory(avatar_folder, filename)
+
+
+
+# MIEMBROS
+
+
+"""
+Rutas coherentes a los miembros de la aplicacion
+"""
+@app.route('/miembros/llamar', methods=['POST'])
+async def CallMemberBusiness():
+    return await MemberControllers.controllerCallMember()
+
 
 """
 Rutas coherentes a los mensajes de la aplicacion.
@@ -62,11 +92,6 @@ async def SendMessages():
     message = request.json['messageSend'];
     return await MessageControllers.controllerCreateMessage(userId, UserFriend, uid, message)
 
-@app.route('/mensajes/buscar/miembro', methods=['POST'])
-async def SearchMessages():
-    UserId = request.json['userId']    
-    UserFriend = request.json['UserFriend']
-    return await MessageControllers.controllerSearchMessage(UserId, UserFriend)
 @app.route('/mensajes/buscar/bot', methods=['POST'])
 async def SearchMessagesBot():
     userid = request.json['userid']  
@@ -80,123 +105,13 @@ async def CallMessageBot():
     return await MessageControllers.controllerMessageAPIBot(userid, message, chatbot)
 
 
+@app.route('/mensajes/buscar/miembro', methods=['POST'])
+async def SearchMessages():
+    UserId = request.json['userId']    
+    UserFriend = request.json['UserFriend']
+    return await MessageControllers.controllerSearchMessage(UserId, UserFriend)
 
 
-
-
-
-
-
-
-
-
-
-
-
-"""
-Rutas coherentes a los negocios de la aplicacion
-"""
-
-@app.route('/negocio/crear', methods=['POST'])
-async def CrearNeg():
-    userId = request.json['userId']
-    nombre = request.json['nombre']
-    ubicacion = request.json['ubicacion']
-    rif = request.json['rif']
-    numero = request.json['numero']
-    return await BusinessControllers.controllerCreateBusiness(userId, nombre, ubicacion, rif, numero)
-
-@app.route('/negocio/llamar', methods=['POST'])
-async def CallBusiness():
-    getUserId = request.json['sendUserId']
-    return await BusinessControllers.controllerCallBusiness(getUserId)
-
-@app.route('/negocio/traer', methods=['POST'])
-async def GetBusiness():
-    idNegocio = request.json['idNegocio']
-    return BusinessControllers.controllerQueryBusiness(idNegocio)
-
-@app.route('/negocio/eliminar', methods=['POST'])
-async def DeleteBusiness():
-    idBusiness = request.json['idBusiness']
-    return await BusinessControllers.controllerDeleteBusiness(idBusiness)
-@app.route('/negocio/generar/reporte', methods=['POST'])
-async def GenerateReport():
-    callsentProduct = request.json['callsentProduct']
-    nameUser = request.json['nameUser']
-    IdBusiness = request.json['IdBusiness']
-    nameClient = request.json['nameClient']
-    reportUid = request.json['reportUid']
-    return await BusinessControllers.controllerGenerateReport(callsentProduct, nameUser, IdBusiness, nameClient, reportUid)
-@app.route('/negocio/busqueda/reporte', methods=['POST'])
-async def SearchReport():
-    idBusiness = request.json['IdBusiness']   
-    return await BusinessControllers.controllerSearchReport(idBusiness)
-@app.route('/negocio/busqueda/reporteID', methods=['POST'])
-async def SearchReportId():
-    idReportData = request.json['idReportData'] 
-    return await BusinessControllers.controllerSearchReportID(idReportData)
-@app.route('/negocio/obtener/global', methods=['POST'])
-async def CallTotalGlobal():
-   idBusiness = request.json['idBusiness']   
-   return await BusinessControllers.controllerGetGlobal(idBusiness)
-
-
-"""
-Rutas coherentes a los productos de la aplicacion.
-"""
-@app.route('/producto/crear', methods=['POST'])
-async def CreateProduct():
-    idBusiness = request.json['idBusiness']
-    name = request.json['name']
-    category = request.json['category']
-    price = request.json['price']
-    cost = request.json['cost']
-    idAccount = request.json['idAccount']
-    return await ProductsControllers.controllerCreateProduct(idBusiness, name, cost, price, category, idAccount)
-
-@app.route('/producto/llamar', methods=['POST'])
-async def CallProduct():
-    idBusiness = request.json['IdBusiness']
-    return await ProductsControllers.controllerCallProduct(idBusiness)
-
-@app.route('/producto/buscar', methods=['POST'])
-async def SearchProduct():
-    nameSearch = request.json['nameSearch']
-    IdBusiness = request.json['IdBusiness']
-    return await ProductsControllers.controllerSearchProduct(nameSearch, IdBusiness)
-
-@app.route('/producto/buscar/unico',methods=['POST'])
-async def CallIDProduct():
-    idBusiness = request.json['idBusiness']
-    idProduct = request.json['idProduct']
-    return await ProductsControllers.controllerSearchIDProduct(idBusiness, idProduct)
-
-@app.route('/producto/cambiar',methods=['POST'])
-async def ChangeProduct():
-    idProduct = request.json['idProduct']
-    name = request.json['name']
-    amount = request.json['amount']
-    cost = request.json['cost']
-    sent = request.json['sent']
-    category = request.json['category']
-    return await ProductsControllers.controllerChangeProduct(idProduct, name, amount, cost, sent, category)
-@app.route('/producto/borrar',methods=['POST'])
-async def DeleteProduct():
-    idProduct = request.json['idProduct']
-    return await ProductsControllers.controllerDeleteProduct(idProduct)
-@app.route('/producto/obtener', methods=['POST'])
-async def FirstSearchProduct():
-    nameSearch = request.json['companyId']
-    return await ProductsControllers.controllerFirstProduct(nameSearch)
-
-"""
-Rutas coherentes a los miembros de la aplicacion
-"""
-@app.route('/miembros/llamar', methods=['POST'])
-async def CallMemberBusiness():
-    idBusiness = request.json['idBusiness']
-    return await MemberControllers.controllerCallMember(idBusiness)
 @app.route('/miembros/permisos',methods=['POST'])
 async def NewPromise():
     idBusiness = request.json['idBusiness']

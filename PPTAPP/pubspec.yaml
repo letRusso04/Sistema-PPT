@@ -33,7 +33,8 @@ dependencies:
   flutter_svg: ^2.0.10
   fl_chart: ^0.68.0
   provider: ^6.1.2
-  image_picker: ^0.8.7+4  # o la última versión disponible
+  image_picker: ^1.0.4
+  shared_preferences: 2.2.2   # opcional, sólo si quieres caché de usuario
 
 dev_dependencies:
   flutter_test:
