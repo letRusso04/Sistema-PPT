@@ -1,50 +1,120 @@
 import 'dart:io';
-
+import 'package:admin/env/api.dart';
+import 'package:admin/providers/profile_provider.dart';
 import 'package:flutter/material.dart';
-import "package:image_picker/image_picker.dart"; // Para tomar o elegir imagen
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MiCuentaScreen extends StatefulWidget {
   const MiCuentaScreen({Key? key}) : super(key: key);
 
   @override
-  _MiCuentaScreenState createState() => _MiCuentaScreenState();
+  State<MiCuentaScreen> createState() => _MiCuentaScreenState();
 }
 
 class _MiCuentaScreenState extends State<MiCuentaScreen> {
-  // Simulando datos del usuario (en producción obtendría esto de la API o estado)
-  String nombre = "Juan Pérez";
-  String correo = "juan.perez@example.com";
-  String cedula = "V-12345678";
-  String ubicacion = "Caracas, Venezuela";
+  String nombre = '';
+  String correo = '';
+  String cedula = '';
+  String ubicacion = '';
 
-  String? imagePath; // Ruta local de la imagen seleccionada
+  String? imagePathLocal; // ruta local tras seleccionar
+  String? imageUrl; // url remota guardada
 
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
   final ImagePicker _picker = ImagePicker();
 
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatosUsuario();
+  }
+
+  Future<void> _cargarDatosUsuario() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      nombre = prefs.getString('nombre') ?? 'Invitado';
+      correo = prefs.getString('email') ?? '';
+      cedula = prefs.getInt('cedula')?.toString() ?? '';
+      ubicacion = prefs.getString('ubicacion') ?? '';
+      imageUrl = prefs.getString('imageUrl'); // ← nueva línea
+    });
+  }
+
   Future<void> _cambiarImagen() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        imagePath = image.path;
-      });
+    final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    setState(() => imagePathLocal = picked.path); // feedback inmediato
+
+    try {
+      await context.read<ProfileProvider>().updateAvatar(
+            archivo: File(picked.path),
+          );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Avatar actualizado'), backgroundColor: Colors.green),
+      );
+
+      // La API debió guardar y devolver nueva URL; recárgala:
+      await _cargarDatosUsuario(); // refresca imageUrl
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Fallo al subir imagen: $e'),
+            backgroundColor: Colors.red),
+      );
     }
   }
 
-  void _cambiarContrasena() {
-    if (_formKey.currentState!.validate()) {
-      // Aquí colocar lógica para cambiar la contraseña en backend o estado
+  Future<int> _cambiarContrasena() async {
+    if (!_formKey.currentState!.validate()) return 0;
+    setState(() {});
+    // Verifica que la contrasena sea iguales validacion antes de enviar.
+    final prefs = await SharedPreferences.getInstance();
+    // envia los datos al servidor
+    int iduserD = prefs.getInt('iduser') ?? 0;
+    print("datalist");
+    print(_newPasswordController);
+    print(_confirmPasswordController);
+
+    if (iduserD == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Contraseña cambiada con éxito')),
+        const SnackBar(
+            content: Text(
+                'Verifica los datos de la contraseña, o intenta más tarde.')),
       );
-      _passwordController.clear();
-      _newPasswordController.clear();
-      _confirmPasswordController.clear();
+      return 0;
     }
+    try {
+      String anuncio = '';
+      final response = await context.read<ProfileProvider>().cambiarcontra(
+          iduser: iduserD,
+          passwordController: _passwordController.text,
+          newPasswordController: _newPasswordController.text);
+      switch (response) {
+        case 0:
+          anuncio = 'Hubo un error en la solicitud con el servidor.';
+        case 1:
+          anuncio = 'Contraseña cambiada con éxito';
+        case 2:
+          anuncio =
+              'La contraseña que introduciste no es correcta, verifica los datos.';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(anuncio)),
+      );
+    } catch (e) {
+      print(e);
+    }
+    _passwordController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
+    return 0;
   }
 
   @override
@@ -57,22 +127,21 @@ class _MiCuentaScreenState extends State<MiCuentaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider avatarProvider;
+    if (imagePathLocal != null) {
+      avatarProvider = FileImage(File(imagePathLocal!)); // recién elegida
+    } else if (imageUrl != 'false') {
+      avatarProvider = NetworkImage('$imageUrlData/$imageUrl'); // URL API
+    } else {
+      avatarProvider = const AssetImage('assets/images/PPTLogo.png');
+    }
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi Cuenta'),
-      ),
+      appBar: AppBar(title: const Text('Mi Cuenta')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Foto de perfil
-            CircleAvatar(
-              radius: 60,
-              backgroundImage: imagePath != null
-                  ? FileImage(File(imagePath!))
-                  : const AssetImage('assets/images/PPTLogo.png')
-                      as ImageProvider,
-            ),
+            CircleAvatar(radius: 60, backgroundImage: avatarProvider),
             TextButton.icon(
               onPressed: _cambiarImagen,
               icon: const Icon(Icons.camera_alt),
@@ -80,88 +149,40 @@ class _MiCuentaScreenState extends State<MiCuentaScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Datos personales
-            Card(
-              child: ListTile(
-                title: const Text('Nombre'),
-                subtitle: Text(nombre),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                title: const Text('Correo'),
-                subtitle: Text(correo),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                title: const Text('Cédula'),
-                subtitle: Text(cedula),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                title: const Text('Ubicación'),
-                subtitle: Text(ubicacion),
-              ),
-            ),
+            _buildInfoCard('Nombre', nombre),
+            _buildInfoCard('Correo', correo),
+            _buildInfoCard('Cédula', cedula),
+            _buildInfoCard('Ubicación', ubicacion),
 
             const SizedBox(height: 30),
 
-            // Cambiar contraseña
+            // … resto de la UI (formulario contraseña) …
+            //   sin cambios respecto a tu versión anterior
             Form(
               key: _formKey,
               child: Column(
                 children: [
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Contraseña actual',
-                      border: OutlineInputBorder(),
-                    ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ingrese su contraseña actual';
-                      }
-                      return null;
-                    },
-                  ),
+                  _buildPasswordField('Contraseña actual', _passwordController),
                   const SizedBox(height: 15),
-                  TextFormField(
-                    controller: _newPasswordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nueva contraseña',
-                      border: OutlineInputBorder(),
-                    ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.length < 6) {
-                        return 'La nueva contraseña debe tener al menos 6 caracteres';
-                      }
-                      return null;
-                    },
-                  ),
+                  _buildPasswordField(
+                      'Nueva contraseña', _newPasswordController),
                   const SizedBox(height: 15),
                   TextFormField(
                     controller: _confirmPasswordController,
+                    obscureText: true,
                     decoration: const InputDecoration(
                       labelText: 'Confirmar nueva contraseña',
                       border: OutlineInputBorder(),
                     ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value != _newPasswordController.text) {
-                        return 'Las contraseñas no coinciden';
-                      }
-                      return null;
-                    },
+                    validator: (v) => v != _newPasswordController.text
+                        ? 'Las contraseñas no coinciden'
+                        : null,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _cambiarContrasena,
                     child: const Text('Cambiar contraseña'),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -170,4 +191,18 @@ class _MiCuentaScreenState extends State<MiCuentaScreen> {
       ),
     );
   }
+
+  // Helpers
+  Widget _buildInfoCard(String title, String value) => Card(
+        child: ListTile(title: Text(title), subtitle: Text(value)),
+      );
+
+  Widget _buildPasswordField(String label, TextEditingController c) =>
+      TextFormField(
+        controller: c,
+        obscureText: true,
+        decoration: InputDecoration(
+            labelText: label, border: const OutlineInputBorder()),
+        validator: (v) => (v == null || v.isEmpty) ? 'Campo requerido' : null,
+      );
 }

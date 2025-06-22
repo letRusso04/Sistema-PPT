@@ -1,13 +1,26 @@
+import 'package:admin/providers/verificacion_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/miembros_provider.dart';
+import 'package:provider/provider.dart';
 
-class ValidarScreen extends StatelessWidget {
+class ValidarScreen extends StatefulWidget {
   const ValidarScreen({Key? key}) : super(key: key);
 
   @override
+  State<ValidarScreen> createState() => _ValidarScreenState();
+}
+
+class _ValidarScreenState extends State<ValidarScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Carga miembros solo 1 vez al iniciar la pantalla
+    Provider.of<MiembrosProvider>(context, listen: false).fetchMiembros();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Filtramos solo no‑verificados
     final pendientes = context
         .watch<MiembrosProvider>()
         .miembros
@@ -32,7 +45,7 @@ class _PendienteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prov = context.read<MiembrosProvider>();
+    final verifProv = context.read<VerificacionProvider>();
 
     return LayoutBuilder(
       builder: (ctx, c) {
@@ -44,11 +57,21 @@ class _PendienteCard extends StatelessWidget {
             Text(miembro.nombre,
                 style:
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            Text('Rol: ${miembro.rol}'),
+            Text('Permisos: Sin verificar'),
             Text('Correo: ${miembro.correo}'),
+            Text('Cédula: ${miembro.cedula}'),
+            Text('Estado: ${miembro.estado}'),
+            Text('Ubicacion: ${miembro.ubicacion}'),
+            Text('Telefono: ${miembro.telefono}'),
           ],
         );
-
+        ImageProvider avatarProvider;
+        print("datalist ${miembro.foto}");
+        if (miembro.foto != 'false') {
+          avatarProvider = NetworkImage('${miembro.foto}'); // URL API
+        } else {
+          avatarProvider = const AssetImage('assets/images/PPTLogo.png');
+        }
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           child: Padding(
@@ -57,8 +80,7 @@ class _PendienteCard extends StatelessWidget {
               direction: vertical ? Axis.vertical : Axis.horizontal,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                    radius: 32, backgroundImage: AssetImage(miembro.foto)),
+                CircleAvatar(radius: 32, backgroundImage: avatarProvider),
                 SizedBox(width: vertical ? 0 : 16, height: vertical ? 12 : 0),
                 vertical ? info : Expanded(child: info),
                 SizedBox(width: vertical ? 0 : 16, height: vertical ? 12 : 0),
@@ -70,21 +92,7 @@ class _PendienteCard extends StatelessWidget {
                     ElevatedButton.icon(
                       icon: const Icon(Icons.check),
                       label: const Text('Aprobar'),
-                      onPressed: () {
-                        prov.actualizar(
-                          Miembro(
-                            id: miembro.id,
-                            nombre: miembro.nombre,
-                            foto: miembro.foto,
-                            rol: miembro.rol,
-                            estado: miembro.estado,
-                            ubicacion: miembro.ubicacion,
-                            correo: miembro.correo,
-                            telefono: miembro.telefono,
-                            verificado: true,
-                          ),
-                        );
-                      },
+                      onPressed: () => verifProv.aprobar(miembro.id),
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
@@ -92,7 +100,7 @@ class _PendienteCard extends StatelessWidget {
                           ElevatedButton.styleFrom(backgroundColor: Colors.red),
                       icon: const Icon(Icons.delete),
                       label: const Text('Rechazar'),
-                      onPressed: () => prov.eliminar(miembro.id),
+                      onPressed: () => verifProv.rechazar(miembro.id),
                     ),
                   ],
                 ),

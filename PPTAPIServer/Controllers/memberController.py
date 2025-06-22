@@ -1,7 +1,7 @@
 from models.memberModel import MemberModel
 class MemberControllers:
-    async def controllerCallMember(idBusiness):
-        await MemberModel.modelCallMember(idBusiness)
+    async def controllerCallMember():
+        return await MemberModel.modelCallMember()
 
     async def controllerPermissionsMember(idBusiness, idUser, selectedOption):
         await MemberModel.modelPermissionsMember(idBusiness, idUser, selectedOption)

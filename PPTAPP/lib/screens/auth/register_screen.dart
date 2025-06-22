@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nombreCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   final _cedulaCtrl = TextEditingController();
+  final _telfContrl = TextEditingController();
   final _ubicCtrl = TextEditingController();
   String? _estadoSel;
 
@@ -64,23 +65,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _loading = true;
-      _error = null;
     });
-
     try {
       await context.read<AuthProvider>().register(
             email: _emailCtrl.text.trim(),
             nombre: _nombreCtrl.text.trim(),
             password: _passCtrl.text,
             cedula: _cedulaCtrl.text.trim(),
+            telefono: _telfContrl.text.trim(),
             ubicacion: _ubicCtrl.text.trim(),
             estado: _estadoSel!,
           );
-      // al registrarse, volverá a MainScreen gracias al auto‑login
+
+      // ✅ Éxito → SnackBar verde + navegación a Login
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('¡Registro exitoso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Espera 1 s para que el usuario vea la notificación y navega
+        await Future.delayed(const Duration(seconds: 1));
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     } catch (e) {
-      setState(() => _error = e.toString());
+      // ❌ Error → SnackBar rojo
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted)
+        setState(() => _loading = false); // ← se ejecuta pase lo que pase
     }
   }
 
@@ -159,6 +180,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             decoration: const InputDecoration(
                               prefixIcon: Icon(Icons.badge_outlined),
                               labelText: 'Cédula de identidad',
+                            ),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            validator: (v) =>
+                                (v == null || v.isEmpty) ? 'Requerido' : null,
+                          ),
+                          const SizedBox(height: 16),
+
+                          //Telefono
+                          TextFormField(
+                            controller: _telfContrl,
+                            decoration: const InputDecoration(
+                              prefixIcon: Icon(Icons.badge_outlined),
+                              labelText: 'Telefono móvil',
                             ),
                             keyboardType: TextInputType.number,
                             inputFormatters: [

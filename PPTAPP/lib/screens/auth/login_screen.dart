@@ -32,10 +32,16 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await context.read<AuthProvider>().login(
+      final response = await context.read<AuthProvider>().login(
             email: _emailCtrl.text.trim(),
             password: _passCtrl.text,
           );
+      print(response);
+      if (response == 1)
+        return setState(() =>
+            _error = 'Usuario no verificado, comunica con un administrador.');
+      await Future.delayed(const Duration(seconds: 1));
+      Navigator.pushReplacementNamed(context, '/');
     } catch (e) {
       setState(() => _error = 'Credenciales incorrectas');
     } finally {
