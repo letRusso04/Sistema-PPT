@@ -22,7 +22,6 @@ export function Organism_preview(props) {
             <div className="user_information_button">
               <label className="delete_user">ELIMINAR USUARIO</label>
               <label className="update_user">ACTUALIZAR USUARIO</label>
-              <label className="grant_user">ENTREGAR PERMISOS</label>
 
             </div>
           </div>
@@ -44,7 +43,6 @@ export function Organism_preview(props) {
             <div className="user_information_button">
               <label className="delete_user">ELIMINAR USUARIO</label>
               <label className="update_user">ACTUALIZAR USUARIO</label>
-              <label className="grant_user">ENTREGAR PERMISOS</label>
 
             </div>
           </div>
@@ -66,7 +64,6 @@ export function Organism_preview(props) {
             <div className="user_information_button">
               <label className="delete_user">ELIMINAR USUARIO</label>
               <label className="update_user">ACTUALIZAR USUARIO</label>
-              <label className="grant_user">ENTREGAR PERMISOS</label>
 
             </div>
           </div>
@@ -88,7 +85,6 @@ export function Organism_preview(props) {
             <div className="user_information_button">
               <label className="delete_user">ELIMINAR USUARIO</label>
               <label className="update_user">ACTUALIZAR USUARIO</label>
-              <label className="grant_user">ENTREGAR PERMISOS</label>
 
             </div>
           </div>
@@ -110,7 +106,6 @@ export function Organism_preview(props) {
             <div className="user_information_button">
               <label className="delete_user">ELIMINAR USUARIO</label>
               <label className="update_user">ACTUALIZAR USUARIO</label>
-              <label className="grant_user">ENTREGAR PERMISOS</label>
 
             </div>
           </div>
@@ -132,7 +127,6 @@ export function Organism_preview(props) {
             <div className="user_information_button">
               <label className="delete_user">ELIMINAR USUARIO</label>
               <label className="update_user">ACTUALIZAR USUARIO</label>
-              <label className="grant_user">ENTREGAR PERMISOS</label>
 
             </div>
           </div>

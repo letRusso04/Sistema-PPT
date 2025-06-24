@@ -26,16 +26,24 @@ Para funcionar correctamente, se recomienda installar flask[async].
 """
 @app.route('/registro', methods=['POST'])
 async def RegisterUser():
-    print("llega los datos")
-    email = request.json['email']
-    nombre = request.json['name']
-    password = request.json['password']
-    cedula = request.json['cedula']
-    ubicacion = request.json['ubicacion']
-    estado = request.json['estado']
-    telefono = request.json['telefono']
-    response = await AuthControllers.controllerRegister(email, nombre, cedula, password, ubicacion, estado, telefono)
-    return response
+    try:
+        # 2. Verifica si hay JSON
+        if not request.json:
+            return {"error": "Se esperaba JSON"}, 400
+        # 4. Accede a los datos con .get() para evitar KeyError
+        data = request.json
+        email = data.get('email')
+        nombre = data.get('name')
+        password = data.get('password')
+        ubicacion = data.get('ubicacion')
+        estado = data.get('estado')
+        telefono = data.get('telefono')
+        cedula = data.get('cedula')
+        return await AuthControllers.controllerRegister(email, nombre, cedula, password, ubicacion, estado, telefono)
+        
+    except Exception as e:
+        print("Error:", str(e))
+        return {"error": str(e)}, 500
 
 @app.route('/inicio', methods=['POST'])
 async def routerAuth():

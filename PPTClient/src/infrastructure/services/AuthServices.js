@@ -24,7 +24,6 @@ export class AuthServices {
         password: this.password,
       }),
     });
-    Session.destroy("user_business");
     Session.destroy("user_information");
     const data = await response.json();
     if (data == "false" || data == false) {
@@ -34,29 +33,48 @@ export class AuthServices {
         0
       );
       return;
+
     }
+
+
+    /*
+    us_pk, us_verified, us_name, us_password, us_cedula, us_ubicacion, us_email, us_phone, us_estado, us_adm, imageUrl 
+    */
     Session.start("user_information", {
       payload: {
-        user_email: data[0][0],
-        user_id: data[0][1],
-        user_verified: data[0][2],
-        user_name: data[0][3],
-        user_bussinesName: data[0][4],
-        user_subname: data[0][5],
+        user_id: data[0][0],
+        user_name: data[0][2],
+        user_cedula: data[0][4],
+        user_ubicacion: data[0][5],
+        user_email: data[0][6],
+        user_phone: data[0][7],
+        user_estado: data[0][8],
+        user_admin: data[0][9],
+        user_image: data[0][10]
       },
     });
-    window.location.href = "/usuarios";
+    if(data[0][1] == 0) return cursorNotification.notificationError(
+        "Esta cuenta no tiene autorizacion al sistema.",
+        window.location,
+        0
+      );
+    window.location.href = "/dashboard/home";
   }
 
   // Servicio de registro
+  /*
+      return { email, name, password, passwordconfirm, tlfchange, name, number, controlUbicacion, category };
+
+  */
   async servicesHandleRegister(DTOData) {
     this.DTOData = DTOData;
     this.email = this.DTOData.email;
-    console.log(this.DTOData.email);
     this.name = this.DTOData.name;
     this.password = this.DTOData.password;
-    this.businessName = this.DTOData.businessName;
-    this.id = uuid();
+    this.tlfchange = this.DTOData.tlfchange;
+    this.cedula = this.DTOData.numberdata;
+    this.ubicacion = this.DTOData.controlUbicacion;
+    this.estado = this.DTOData.category;
     await fetch(`${router.routerAuth.registro}`, {
       method: "POST",
       headers: { "Content-type": "application/json" },
@@ -64,12 +82,19 @@ export class AuthServices {
         email: this.email,
         name: this.name,
         password: this.password,
-        businessName: this.businessName,
-        id: this.id,
+        telefono: this.tlfchange,
+        name: this.name,
+        cedula: this.cedula,
+        ubicacion: this.ubicacion,
+        estado: this.estado,
       }),
     });
     window.location.href = "/inicio";
   }
+
+
+
+
   // Servicio cuando se crea el usuario.
   async servicesHandleRegisterUser(DTOData) {
     this.DTOData = DTOData;
@@ -131,57 +156,3 @@ export class AuthServices {
     return NavigationModal;
   }
 }
-/*
-fg_main, ac_id, ac_name, ac_password, ac_number, ac_gener, ac_ubicacion, ac_date
-*/
-/*
-export const servicesHandleResform = async (DTOResform) => {
-  let select = DTOResform.selectedOption.value;
-  let seudonimo = DTOResform.seudonimo;
-  let date = DTOResform.date;
-  let numero = DTOResform.number;
-  let emailIsValid = DTOResform.emailIsValid;
-  await fetch(`${router.routerAuth.segundoRegistro}`, {
-    method: "POST",
-    headers: { "Content-type": "application/json" },
-    body: JSON.stringify({
-      seudonimo,
-      date,
-      select,
-      numero,
-      emailIsValid,
-    }),
-  }).then(() => {
-    Session.setPayload({
-      user_verified: "2",
-    });
-  });
-};
-
-export const servicesHandleGenerateToken = async (DTOGenerate) => {
-  let generateToken = Math.random().toString(36).substring(2);
-  let emailIsValid = DTOGenerate.emailIsValid;
-  await fetch(`${router.routerAuth.generarToken}`,{
-      method: 'POST',
-      headers: {'Content-type': 'application/json'},
-      body: JSON.stringify({
-         generateToken,
-         emailIsValid
-      })
-    }) 
-}
-export const servicesHandleControlToken = async(DTOControl)=>{
-  let token = DTOControl.token;
-  if(token.length >= 10){
-      const response = await fetch(`${router.routerAuth.confirmarToken}`,{
-          method: 'POST',
-          headers: {'Content-type': 'application/json'},
-          body: JSON.stringify({
-              emailIsValid,
-              token
-          })
-        })
-        let data = await response.json();    
-        return data;
-  }
-}*/
