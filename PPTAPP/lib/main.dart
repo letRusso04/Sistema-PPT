@@ -5,6 +5,7 @@ import 'package:admin/providers/chat_provider.dart';
 import 'package:admin/providers/miembros_provider.dart';
 import 'package:admin/providers/profile_provider.dart';
 import 'package:admin/providers/verificacion_provider.dart';
+import 'package:admin/screens/placeholder/publicacion_screen.dart';
 import 'package:admin/screens/verificacion/verificacion_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +16,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/home/principal_screen.dart'; // la pantalla solicitada
-//  (los siguientes son “stubs”; cámbialos por tus implementaciones reales)
 import 'screens/placeholder/auditoria_screen.dart';
 import 'screens/placeholder/eventos_screen.dart';
 import 'screens/placeholder/mi_cuenta_screen.dart';
@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
         '/auditoria': (context) => const AuditoriaScreen(),
         '/eventos': (context) => const EventosScreen(),
         '/verificacion': (context) => const VerificacionWrapper(),
-
+        '/publicacion': (context) => const PublicacionScreen(),
         // Navegador derecho
         '/miCuenta': (context) => const MiCuentaScreen(),
         '/mensajes': (context) => const MensajeriaScreen(),

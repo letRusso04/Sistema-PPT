@@ -4,7 +4,6 @@ from services.danEmailServices import DanEmailServices
 from Interface.modelInterface import ModelInterface
 class AuthModels:
     async def modelAuth(email,password):
-        print(f"{email} - {password}")
         try:
             (connect, query)= await database_load()
             query.execute(f"SELECT us_pk, us_verified, us_name, us_password, us_cedula, us_ubicacion, us_email, us_phone, us_estado, us_adm, imageUrl FROM db_main WHERE us_email = '{email}' && us_password = '{password}'")
@@ -14,14 +13,9 @@ class AuthModels:
             DTOData = ModelInterface("BAD_QUERY_RESPONSE")
             return DTOData
         DTOData = ModelInterface(resultData)
-        print(DTOData)
         return DTOData
     
 
-
-
-
-    
     async def modelChangePasword(iduser, contranueva, contravieja):
         try:
             (connect, query)= await database_load()
@@ -44,7 +38,7 @@ class AuthModels:
             (connect, query)= await database_load()
             query.execute(f"UPDATE db_main SET imageUrl='{fileimage}' WHERE us_pk = '{user_id}'")
             connect.commit()
-        except:
+        except Exception:
             DTOData = {'avatarUrl': "BAD_QUERY_RESPONSE"}, 200
             return DTOData   
         DTOData = {'avatarUrl': fileimage}, 200
@@ -64,3 +58,34 @@ class AuthModels:
             return DTOData       
             
 
+    async def Auditory(iduser, cambio, status):
+        try:
+            (connect, query)= await database_load()
+            query.execute(f"INSERT INTO db_audit(fg_user, audit_control, audit_change, audit_rank) VALUES ('{iduser}', '{cambio}', '{status}', 1)")
+            connect.commit()
+            DTOData = ModelInterface("SUCCESS_QUERY_RESPONSE")
+            return DTOData
+        except Exception as e: 
+            print(f"error {e}")
+    
+    async def modelCallAudit():
+        try:
+            connect, query = await database_load()
+            query.execute("SELECT fg_user, audit_control, audit_change, audit_date FROM db_audit")
+            resultData = query.fetchall()
+            connect.commit()
+            logs = []
+            for row in resultData:
+                logs.append({
+                    "usuario": row[0],
+                    "accion": row[2],
+                    "detalle": row[1],
+                    "fecha": row[3].isoformat()  
+                })
+
+            return logs
+
+        except Exception as e:
+            print(f"Error al obtener auditoría: {e}")
+            return []
+        

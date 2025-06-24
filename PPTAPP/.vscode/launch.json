@@ -4,19 +4,20 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "Flutter-Responsive-Admin-Panel-or-Dashboard",
+            "name": "PPTAPP",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "Flutter-Responsive-Admin-Panel-or-Dashboard (profile mode)",
+            "name": "PPTAPP(profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "Flutter-Responsive-Admin-Panel-or-Dashboard (release mode)",
+            "name": "PPTAPP (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

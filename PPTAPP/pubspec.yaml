@@ -34,7 +34,8 @@ dependencies:
   fl_chart: ^0.68.0
   provider: ^6.1.2
   image_picker: ^1.0.4
-  shared_preferences: 2.2.2   # opcional, sólo si quieres caché de usuario
+  shared_preferences: 2.2.2   
+  dio: ^5.4.0
 
 dev_dependencies:
   flutter_test:

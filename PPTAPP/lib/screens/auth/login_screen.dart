@@ -36,7 +36,6 @@ class _LoginScreenState extends State<LoginScreen> {
             email: _emailCtrl.text.trim(),
             password: _passCtrl.text,
           );
-      print(response);
       if (response == 1)
         return setState(() =>
             _error = 'Usuario no verificado, comunica con un administrador.');

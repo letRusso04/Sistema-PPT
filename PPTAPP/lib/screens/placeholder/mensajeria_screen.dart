@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/chat_provider.dart'; // importa tu ChatProvider
+import 'package:shared_preferences/shared_preferences.dart'; // <-- importar
+import '../../providers/chat_provider.dart';
 
 class MensajeriaScreen extends StatefulWidget {
   const MensajeriaScreen({Key? key}) : super(key: key);
@@ -10,23 +11,39 @@ class MensajeriaScreen extends StatefulWidget {
 }
 
 class _MensajeriaScreenState extends State<MensajeriaScreen> {
-  late ChatProvider chatProvider;
+  final ChatProvider chatProvider = ChatProvider();
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _cargando = true;
+  String? _currentUserId; // <--- ID usuario actual
 
+  @override
   void initState() {
     super.initState();
-    chatProvider = ChatProvider(); //  ←  sin  members: [...]
+    _initUserAndChat();
+  }
+
+  Future<void> _initUserAndChat() async {
+    final prefs = await SharedPreferences.getInstance();
+    final idUser = prefs.getInt('iduser')?.toString();
+
+    if (idUser == null) {
+      // Manejar error o redirigir a login
+      print("Usuario no autenticado");
+      return;
+    }
     chatProvider.fetchMembers().whenComplete(() {
       if (mounted) setState(() => _cargando = false);
     });
+    _currentUserId = idUser;
+    await chatProvider.fetchMembers();
+    if (mounted) setState(() => _cargando = false);
   }
 
   void _sendMessage() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    chatProvider.sendMessage(text);
+    chatProvider.sendMessage(text, senderId: _currentUserId!);
     _controller.clear();
 
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -38,13 +55,6 @@ class _MensajeriaScreenState extends State<MensajeriaScreen> {
         );
       }
     });
-
-    if (chatProvider.selectedUserId != null) {
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        chatProvider.receiveMessage(
-            chatProvider.selectedUserId!, 'Ok, recibido!');
-      });
-    }
   }
 
   Widget _buildMemberList(BuildContext context, bool isDrawer) {
@@ -54,9 +64,15 @@ class _MensajeriaScreenState extends State<MensajeriaScreen> {
       child: _cargando
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-              itemCount: chatProvider.members.length,
+              // Filtramos miembros para excluir al usuario actual
+              itemCount: chatProvider.members
+                  .where((m) => m.id != _currentUserId)
+                  .length,
               itemBuilder: (context, index) {
-                final member = chatProvider.members[index];
+                final filteredMembers = chatProvider.members
+                    .where((m) => m.id != _currentUserId)
+                    .toList();
+                final member = filteredMembers[index];
                 final selected = member.id == chatProvider.selectedUserId;
                 final imgProvider = member.avatarPath.startsWith('http')
                     ? NetworkImage(member.avatarPath)
@@ -171,7 +187,7 @@ class _MensajeriaScreenState extends State<MensajeriaScreen> {
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   final msg = messages[index];
-                  final isMe = msg.senderId == 'me';
+                  final isMe = msg.senderId == _currentUserId;
                   return Align(
                     alignment:
                         isMe ? Alignment.centerRight : Alignment.centerLeft,

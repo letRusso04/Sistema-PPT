@@ -66,6 +66,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() {
       _loading = true;
     });
+
     try {
       await context.read<AuthProvider>().register(
             email: _emailCtrl.text.trim(),
@@ -77,7 +78,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             estado: _estadoSel!,
           );
 
-      // ✅ Éxito → SnackBar verde + navegación a Login
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

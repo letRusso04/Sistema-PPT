@@ -1,60 +1,81 @@
+import 'package:admin/env/api.dart';
 import 'package:admin/providers/auth_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:admin/widgets/network_image_keep_alive.dart';
 
-/// ───── MODELO DE DEMO ──────────────────────────────────────────────
 class Post {
   final String imagen;
+  final String titulo;
   final String texto;
   final DateTime fecha;
-  const Post({required this.imagen, required this.texto, required this.fecha});
+
+  const Post({
+    required this.imagen,
+    required this.titulo,
+    required this.texto,
+    required this.fecha,
+  });
+
+  factory Post.fromJson(Map<String, dynamic> json) {
+    print("postimage $imagePostData/\${imagenes}");
+    return Post(
+      imagen: json['post_urlimage'] ?? '',
+      titulo: json['post_title'] ?? '',
+      texto: json['post_content'] ?? '',
+      fecha: DateTime.parse(json['post_date']),
+    );
+  }
 }
 
-final _postsDemo = [
-  Post(
-    imagen: 'assets/images/banner4.jpg',
-    texto:
-        'El Partido Patria para Todos (PPT) presentará este lunes en rueda de prensa ocho precandidatos para las venideras elecciones de gobernadores del 25 de mayo, propuesta que será analizada y debatida en la reunión general que sostendrán con el Gran Polo Patriótico (GPP), instancia donde convergen todas las organizaciones políticas revolucionarias, anunció la secretaria general de la tolda azul, Ilenia Medina. Durante una entrevista concedida en el programa «Al Aire», que transmite Venezolana de Televisión, la diputada Medina afirmó que «desde el seno del PPT consideran que se requieren figuras que hayan estado toda su vida en el proceso revolucionario, con visiones muy contundentes para asumir cargos en el caso de los gobernadores, y de estos que serán presentados hay una mujer, el resto de las compañeras con mucha fuerza optaron para desarrollar los trabajos en los respectivos estados',
-    fecha: DateTime(2025, 6, 14, 10, 30),
-  ),
-  Post(
-    imagen: 'assets/images/banner5.jpg',
-    texto:
-        'El Consejo Nacional Electoral (CNE) proclamó oficialmente a los nuevos diputados de la Asamblea Nacional la victoria del partido oficialista, el Gran Polo Patriótico Simón Bolívar (GPPSB) con 253 escaños y 23 gobernaciones. La jornada electoral, con una participación del 43,18%, fue calificada por el CNE como una muestra de civismo y madurez democrática del pueblo venezolano.',
-    fecha: DateTime(2025, 6, 13, 16, 15),
-  ),
-];
+Future<List<Post>> fetchPublicaciones() async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/publicaciones/llamar'),
+    headers: {"Connection": "Keep-Alive", "Keep-Alive": "timeout=5, max=1000"},
+  );
+  print("respuesta \${json.decode(response.body)}");
+  if (response.statusCode == 200) {
+    List<dynamic> data = json.decode(response.body);
+    return data.map((item) => Post.fromJson(item)).toList();
+  } else {
+    throw Exception('Error al cargar publicaciones');
+  }
+}
 
-/// ───── PANTALLA PRINCIPAL ─────────────────────────────────────────
-class PrincipalScreen extends StatelessWidget {
-  PrincipalScreen({Key? key}) : super(key: key);
+Future<bool> isImageReachable(String url) async {
+  try {
+    final response = await http.get(Uri.parse(url));
+    return response.statusCode == 200;
+  } catch (_) {
+    return false;
+  }
+}
 
+class PrincipalScreen extends StatefulWidget {
+  @override
+  _PrincipalScreenState createState() => _PrincipalScreenState();
+}
+
+class _PrincipalScreenState extends State<PrincipalScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  late Future<List<Post>> _futurePosts;
+
+  @override
+  void initState() {
+    super.initState();
+    _futurePosts = fetchPublicaciones();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-
-      // ‑‑‑‑‑ Drawers
-      drawer: _LeftDrawer(onNavigate: (route) {
-        Navigator.pop(context); // cierra drawer
-        if (ModalRoute.of(context)?.settings.name != route) {
-          Navigator.pushNamed(context, route);
-        }
-      }),
-      endDrawer: _RightDrawer(onLogout: () {
-        context.read<AuthProvider>().logout();
-        Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-      }, onNavigate: (route) {
-        Navigator.pop(context);
-        if (ModalRoute.of(context)?.settings.name != route) {
-          Navigator.pushNamed(context, route);
-        }
-      }),
-
-      // ‑‑‑‑‑ AppBar
+      drawer: _LeftDrawer(onNavigate: _navigate),
+      endDrawer: _RightDrawer(onLogout: _logout, onNavigate: _navigate),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.black54,
@@ -70,33 +91,106 @@ class PrincipalScreen extends StatelessWidget {
           ),
         ],
       ),
-
-      // ‑‑‑‑‑ Contenido
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        child: ListView(
-          children: [
-            Text('Últimas publicaciones',
-                style: GoogleFonts.poppins(
-                    fontSize: 24, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 16),
-            ..._postsDemo.map((p) => _PostCard(post: p)),
-          ],
+        child: FutureBuilder<List<Post>>(
+          future: _futurePosts,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError ||
+                snapshot.data == null ||
+                snapshot.data!.isEmpty) {
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.only(bottom: 24),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.info_outline,
+                          size: 48, color: Colors.grey),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No hay publicaciones disponibles.',
+                        style: GoogleFonts.poppins(
+                            fontSize: 16, color: Colors.grey[600]),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final posts = snapshot.data!;
+            return ListView(
+              children: [
+                Text('Últimas publicaciones',
+                    style: GoogleFonts.poppins(
+                        fontSize: 24, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 16),
+                ...posts.map((p) => _PostCard(post: p)),
+              ],
+            );
+          },
         ),
       ),
     );
   }
+
+  void _navigate(String route) {
+    Navigator.pop(context);
+    if (ModalRoute.of(context)?.settings.name != route) {
+      Navigator.pushNamed(context, route);
+    }
+  }
+
+  void _logout() {
+    context.read<AuthProvider>().logout();
+    Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+  }
 }
 
-/// ───── Drawer izquierdo ───────────────────────────────────────────
-class _LeftDrawer extends StatelessWidget {
+class _LeftDrawer extends StatefulWidget {
   const _LeftDrawer({required this.onNavigate});
 
   final void Function(String route) onNavigate;
 
   @override
+  State<_LeftDrawer> createState() => _LeftDrawerState();
+}
+
+class _LeftDrawerState extends State<_LeftDrawer> {
+  int? _admin;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAdmin();
+  }
+
+  Future<void> _loadAdmin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final adminValue = prefs.getInt('admin') ?? 0;
+    setState(() {
+      _admin = adminValue;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     TextStyle style = GoogleFonts.poppins(fontSize: 14);
+
+    if (_admin == null) {
+      return Drawer(
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Drawer(
       child: ListView(
@@ -109,7 +203,10 @@ class _LeftDrawer extends StatelessWidget {
           ),
           _tile('Principal', '/', style),
           _tile('Verificacion', '/verificacion', style),
-          _tile('Auditoría', '/auditoria', style),
+          if (_admin == 1) ...[
+            _tile('Auditoría', '/auditoria', style),
+            _tile('Publicacion', '/publicacion', style),
+          ],
           _tile('Eventos', '/eventos', style),
         ],
       ),
@@ -118,11 +215,10 @@ class _LeftDrawer extends StatelessWidget {
 
   ListTile _tile(String title, String route, TextStyle s) => ListTile(
         title: Text(title, style: s),
-        onTap: () => onNavigate(route),
+        onTap: () => widget.onNavigate(route),
       );
 }
 
-/// ───── Drawer derecho ─────────────────────────────────────────────
 class _RightDrawer extends StatelessWidget {
   const _RightDrawer({
     required this.onNavigate,
@@ -163,13 +259,14 @@ class _RightDrawer extends StatelessWidget {
       );
 }
 
-/// ───── Card de publicación ────────────────────────────────────────
 class _PostCard extends StatelessWidget {
   final Post post;
   const _PostCard({required this.post});
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = '$imagePostData/${post.imagen}';
+
     return Card(
       elevation: 6,
       margin: const EdgeInsets.only(bottom: 24),
@@ -177,7 +274,6 @@ class _PostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cabecera
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -202,16 +298,43 @@ class _PostCard extends StatelessWidget {
               ],
             ),
           ),
-          // Imagen
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.zero),
-            child: Image.asset(post.imagen,
-                width: double.infinity, fit: BoxFit.cover),
-          ),
-          // Texto
+          if (post.imagen.isNotEmpty)
+            FutureBuilder<bool>(
+              future: isImageReachable(imageUrl),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox(
+                    height: 180,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                } else if (snapshot.hasData && snapshot.data == true) {
+                  return ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.zero),
+                    child: NetworkImageWithKeepAlive(
+                      imageUrl: '$imagePostData/${post.imagen}',
+                    ),
+                  );
+                } else {
+                  return const Padding(
+                    padding: EdgeInsets.all(16),
+                    child:
+                        Icon(Icons.broken_image, size: 100, color: Colors.grey),
+                  );
+                }
+              },
+            ),
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Text(post.texto, style: GoogleFonts.poppins(fontSize: 14)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(post.titulo,
+                    style: GoogleFonts.poppins(
+                        fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                Text(post.texto, style: GoogleFonts.poppins(fontSize: 14)),
+              ],
+            ),
           ),
         ],
       ),

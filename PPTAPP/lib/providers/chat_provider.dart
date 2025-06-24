@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:admin/env/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Member {
   final String id;
@@ -35,15 +36,76 @@ class ChatProvider extends ChangeNotifier {
 
   void selectUser(String userId) {
     _selectedUserId = userId;
+    _loadMessages(userId);
     notifyListeners();
   }
 
-  void sendMessage(String text) {
+  Future<void> _loadMessages(String userId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final myId = prefs.getInt('iduser')?.toString() ?? '0';
+
+      final url = Uri.parse('$baseUrl/mensajes/buscar');
+      final res = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'from_id': myId, 'to_id': userId}),
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (res.statusCode != 200) {
+        throw Exception('Error ${res.statusCode}');
+      }
+
+      final List<dynamic> data = jsonDecode(res.body);
+      final msgs = data
+          .map((msg) => Message(
+                senderId: msg['sender_id'].toString(),
+                text: msg['message'],
+                time: DateTime.parse(msg['timestamp']),
+              ))
+          .toList();
+      _messages[userId] = msgs;
+      notifyListeners();
+    } catch (e) {
+      if (kDebugMode) print('Error al cargar mensajes: $e');
+    }
+  }
+
+  Future<void> sendMessage(String text, {required String senderId}) async {
     if (_selectedUserId == null) return;
-    final newMsg = Message(senderId: 'me', text: text, time: DateTime.now());
+
+    final newMsg =
+        Message(senderId: senderId, text: text, time: DateTime.now());
+
+    // Agrega localmente mientras llega al servidor
     _messages.putIfAbsent(_selectedUserId!, () => []);
     _messages[_selectedUserId!]!.add(newMsg);
     notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    final currentUserId = prefs.getInt('iduser')?.toString() ?? '0';
+    try {
+      final url = Uri.parse('$baseUrl/mensajes/enviar');
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'by_id': currentUserId,
+              'to_id': _selectedUserId,
+              'message': text,
+              'timestamp': DateTime.now().toIso8601String(),
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) {
+        throw Exception('Error al enviar mensaje: ${response.body}');
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error al enviar mensaje: $e');
+    }
   }
 
   void receiveMessage(String userId, String text) {
