@@ -5,10 +5,10 @@ Controllers
 """
 class AuthControllers:
     async def controllerAuth(email, password):
-      # try:
+       try:
             return await AuthModels.modelAuth(email,password)
-       #except:
-        #   return 
+       except ValueError:
+           return print(f"error en {ValueError}")
 
     async def controllerRegister(email, name, cedula, password, ubicacion, estado, telefono):
        return await AuthModels.modelRegister(email, name, cedula, password, ubicacion, estado, telefono)
@@ -25,17 +25,8 @@ class AuthControllers:
        #except:
         #   return 
 
-
-    async def controllerCallListUser(clientID):
+    async def modelCallAudit():
       # try:
-            return await AuthModels.modelCallListUser(clientID)
+            return await AuthModels.modelCallAudit()
        #except:
         #   return 
-
-    async def controllerAccount(globalUser, name, number, password, selectedOption, timeDesing, iduser, userIdSQL):
-      return await AuthModels.modelRegisterAccount(globalUser, name, number, password, selectedOption, timeDesing, iduser, userIdSQL)
-                
-
-
-
-        

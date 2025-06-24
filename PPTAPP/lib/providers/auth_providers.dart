@@ -6,6 +6,7 @@ import 'dart:io'; // SocketException
 import 'dart:async';
 import 'package:admin/env/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _storage = const FlutterSecureStorage();
@@ -29,8 +30,7 @@ class AuthProvider extends ChangeNotifier {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       int verificacion = data[0][1];
-      print("verificacion: $verificacion");
-      // if (verificacion == 0) return 1;
+      if (verificacion == 0) return 1;
 
       int _id = data[0][0];
       String _nombre = data[0][2];
@@ -50,6 +50,7 @@ class AuthProvider extends ChangeNotifier {
 
       // 2. datos usuario
       final prefs = await SharedPreferences.getInstance();
+      prefs.setInt('admin', _role);
       prefs.setInt('iduser', _id);
       prefs.setString('nombre', _nombre);
       prefs.setInt('cedula', _cedula);
@@ -57,7 +58,7 @@ class AuthProvider extends ChangeNotifier {
       prefs.setString('email', _email);
       prefs.setInt('telefono', _telefono);
       prefs.setString('estado', _estado);
-      prefs.setInt('admin', _role);
+
       // Validacion de la imagen
       _imageUrl.length > 1
           ? prefs.setString('imageUrl', _imageUrl)
@@ -81,39 +82,43 @@ class AuthProvider extends ChangeNotifier {
     required String ubicacion,
     required String estado,
   }) async {
-    final url = Uri.parse('$baseUrl/registro');
+    print("inicio de proceso");
     try {
-      final response = await http
-          .post(
-            url,
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'email': email,
-              'name': nombre,
-              'password': password,
-              'cedula': cedula,
-              'ubicacion': ubicacion,
-              'estado': estado,
-              'telefono': telefono,
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
+      final dio = Dio();
+      final response = await dio.post(
+        '$baseUrl/registro',
+        data: {
+          'email': email,
+          'name': nombre,
+          'password': password,
+          'cedula': cedula,
+          'ubicacion': ubicacion,
+          'estado': estado,
+          'telefono': telefono,
+        },
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          sendTimeout: const Duration(seconds: 3),
+          receiveTimeout: const Duration(seconds: 3),
+        ),
+      );
 
+      print(response.data);
       //print('status code: ${response.statusCode}');
-      if (response.body == "SUCCESS_QUERY_RESPONSE") {
+      if (response.data == "SUCCESS_QUERY_RESPONSE") {
         _isAuthenticated = true;
         notifyListeners();
       } else {
-        final err = jsonDecode(response.body)['error'] ??
+        final err = jsonDecode(response.data)['error'] ??
             'Error inesperado del servidor';
         throw Exception(err);
       }
     } on SocketException {
-      throw Exception('No se pudo conectar con el servidor');
+      print('No se pudo conectar con el servidor');
     } on TimeoutException {
-      throw Exception('Servidor sin respuesta (timeout)');
+      print('Servidor sin respuesta (timeout)');
     } catch (e) {
-      rethrow; // deja que _submit() lo maneje
+      print('Servidor sin respuesta $e');
     }
   }
 

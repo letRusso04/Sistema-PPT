@@ -16,6 +16,27 @@ class Evento {
 
 const List<Evento> eventos = [
   Evento(
+    fecha: '2025‑06‑24',
+    titulo: 'Auditoría con nombres y permisos',
+    descripcion:
+        'Ahora los registros de auditoría muestran el ID SQL del usuario y el tipo de acción realizada (publicación, edición, expulsión, aprobación).',
+    version: 'v1.3.1',
+  ),
+  Evento(
+    fecha: '2025‑06‑23',
+    titulo: 'Mejora en carga de imágenes',
+    descripcion:
+        'Optimización del renderizado de imágenes en publicaciones. Se maneja el peso y disponibilidad para evitar errores.',
+    version: 'v1.3.0',
+  ),
+  Evento(
+    fecha: '2025‑06‑20',
+    titulo: 'Panel de publicaciones dinámicas',
+    descripcion:
+        'Integración de publicaciones creadas por superusuarios, visibles en el panel principal con título, texto e imagen.',
+    version: 'v1.2.5',
+  ),
+  Evento(
     fecha: '2025‑06‑14',
     titulo: 'Sistema de verificación agregado',
     descripcion:

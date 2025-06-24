@@ -1,6 +1,6 @@
 # Flutter Responsive Admin/Dashboard Template
 
-## [Live Preview](https://abuanwar072.github.io/Flutter-Responsive-Admin-Panel-or-Dashboard/#/)
+## [Live Preview](https://abuanwar072.github.io/PPTAPP/#/)
 
 I've created a step-by-step video tutorial to guide you through the process of building this responsive admin panel. **[Watch it on YouTube](https://youtu.be/_uOgXpEHNbc)**
 
