@@ -6,54 +6,44 @@ export const HooksStatesUse = () => {
   const [name, setName] = useState("");
 
   const [passwordconfirm, setPasswordConfirm] = useState("");
-  const [seudonimo, setSeudonimo] = useState("");
   const [date, setDate] = useState("");
-  const [number, setNumber] = useState("");
+  const [numberdata, setNumber] = useState(0);
   const [selectedOption, setSelectedOption] = useState("");
   const [timeDesing, setTimeDesign] = useState(false);
-  const [controlToken, setControlToken] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [businessRif, setBusinessRif] = useState("");
+  const [controlUbicacion, setControlUbicacion] = useState("");
   const [controllerMenu, setControllerMenu] = useState(false);
-  const [globalUser, setGlobalUser] = useState("");
-
+  const [tlfchange, setChangeTlf] = useState(0);
+  const [category, setCategory] = useState("");
   // Funciones para obtener los datos.
   const onInputEmailChange = (isEmail) => setEmail(isEmail);
-  const onInputPasswordChange = (isPassword) => setPassword(isPassword);
+  const onInputPasswordChange = (isThePass) => setPassword(isThePass);
   const onInputNameChange = (isName) => setName(isName);
-  const onInputGlobalUser = (isGlobal) => setGlobalUser(isGlobal);
   const onInputPasswordConfirmChange = (isPasswordConfirm) => setPasswordConfirm(isPasswordConfirm);
-  const onInputSeudonimoChange = (isSeudonimo) => setSeudonimo(isSeudonimo);
   const onInputDateChange = (isDate) => setDate(isDate);
   const onInputNumberChange = (isNumber) => setNumber(isNumber);
   const onInputSelectedChange = (isSelected) => setSelectedOption(isSelected);
   const onInputTimeDesing = (isTime) => setTimeDesign(isTime);
-  const onInputControlToken = (isToken) => setControlToken(isToken);
-  const onInputBusinessName = (isBusiness) => setBusinessName(isBusiness);
-  const onInputBusinessRif = (isRif) => setBusinessRif(isRif);
+  const onInputControlUbicacion = (isUbi) => setControlUbicacion(isUbi);
+  const onInputCategory = (isCate) => setCategory(isCate);
   const onControllerMenu = (isController) => setControllerMenu(isController); 
+  const onControllerTlf = (isTlf) => setChangeTlf(isTlf); 
+
   // Funciones de retorno de los datos.
   const onLoginData = () => {
     return { email, password };
   };
   const onRegisterData = () => {
-    return { email, name, password, passwordconfirm, businessName, businessRif };
+    return { email, name, password, passwordconfirm, tlfchange, name, numberdata, controlUbicacion, category };
   };
-  const onResformData = () => {
-    return { seudonimo, date, number, selectedOption };
-  };
+
   const onTimeData = ()=>{
     return {timeDesing}
   }
-  const onTokenData = ()=>{
-    return {controlToken}
-  }
+
   const onControllers = () =>{
     return {controllerMenu}
   }
-  const onRegisterUser = () =>{
-    return {name,  number, password,  globalUser, selectedOption, timeDesing}
-  }
+
 
   // Creacion de un objeto que almacene todos los métodos, para aligerar las importaciones.
   const onInputController = {
@@ -61,26 +51,22 @@ export const HooksStatesUse = () => {
     onInputPasswordChange,
     onInputNameChange,
     onInputPasswordConfirmChange,
-    onInputSeudonimoChange,
     onInputDateChange,
     onInputNumberChange,
     onInputSelectedChange,
     onInputTimeDesing,
-    onInputControlToken,
-    onInputBusinessName,
-    onInputBusinessRif,
+    onInputControlUbicacion,
+    onInputCategory,
     onControllerMenu,
-    onInputGlobalUser
+    onControllerTlf,
+
   };
   // Creacion de un objeto que almacene todos los metodos de traer datos.
   const onResponseData ={
     onLoginData,
     onRegisterData,
-    onResformData,
     onTimeData,
-    onTokenData,
     onControllers,
-    onRegisterUser
   }
   // Retorno.
   return {

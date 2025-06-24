@@ -4,6 +4,16 @@ export const Molecules_RegisterStyles = styled.div`
   width: 70%;
   padding: 20px;
   display: flex;
+  input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield; /* Firefox */
+    appearance: textfield; /* Otros navegadores */
+}
   div > p {
     font-size: 16px;
     width: 100%;

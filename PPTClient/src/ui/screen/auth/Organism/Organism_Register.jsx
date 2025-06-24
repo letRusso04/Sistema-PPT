@@ -55,7 +55,7 @@ function Organism_Register() {
       className="content"
       onSubmit={(e) => {
         e.preventDefault();
-        cursorControlador.controllerRegister(onResponseData.onRegisterData());
+       cursorControlador.controllerRegister(onResponseData.onRegisterData());
       }}
       method="POST"
     >
@@ -111,19 +111,22 @@ function Organism_Register() {
             </div>
           </Molecules_RegisterStyles>
 
-          {/*   <Molecules_RegisterStyles>
+             <Molecules_RegisterStyles>
          <div className="format_input">
            <Icon style={{ margin: 5 }} path={mdiCellphoneText} size={1.2} />
            <input
-             type="tel"
+             type="number"
              name=""
              id=""
              pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
              required
+                  onChange={(e) =>
+                  onInputController.onControllerTlf(e.target.value)
+                }
              placeholder="Registre un número de telefónico"
            />
          </div>
-       </Molecules_RegisterStyles>*/}
+       </Molecules_RegisterStyles>
         </div>
         <div className="content__main-right">
           <Molecules_RegisterStyles>
@@ -137,7 +140,7 @@ function Organism_Register() {
                 type="text"
                 autocomplete="off"
                 onChange={(e) =>
-                  onInputController.onInputBusinessName(e.target.value)
+                  onInputController.onInputNameChange(e.target.value)
                 }
                 placeholder="Ingrese el nombre y apellido"
               />
@@ -151,10 +154,10 @@ function Organism_Register() {
                 size={1.2}
               />
               <input
-                type="text"
+                type="number"
                 autocomplete="off"
                 onChange={(e) =>
-                  onInputController.onInputBusinessRif(e.target.value)
+                  onInputController.onInputNumberChange(e.target.value)
                 }
                 placeholder="Registra la Cedula de Identidad"
               />
@@ -172,7 +175,7 @@ function Organism_Register() {
                 type="text"
                 autocomplete="off"
                 onChange={(e) =>
-                  onInputController.onInputBusinessRif(e.target.value)
+                  onInputController.onInputControlUbicacion(e.target.value)
                 }
                 placeholder="Ubicación exacta del registrado."
               />
@@ -184,7 +187,7 @@ function Organism_Register() {
               <Select
                 className="select_options"
                 name="CATEGORIAS"
-                onChange={(e) => setCategory(e.label)}
+                onChange={(e) => onInputController.onInputCategory(e.label)}
                 options={options}
                 styles={{
                   control: (baseStyles, state) => ({

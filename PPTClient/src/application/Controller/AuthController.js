@@ -40,7 +40,7 @@ export class AuthController {
 
   
   /*
-  email, name, password, passwordconfirm, businessName, businessRif 
+    return { email, name, password, passwordconfirm, tlfchange, name, number, controlUbicacion, category };
   
   */
   async controllerRegister(DTOController) {
@@ -50,10 +50,12 @@ export class AuthController {
       if (
         validateThis.isEmpty(this.DTOController.name) ||
         validateThis.isEmpty(this.DTOController.email) ||
-        validateThis.isEmpty(this.DTOController.businessName) ||
+        validateThis.isEmpty(this.DTOController.tlfchange) ||
         validateThis.isEmpty(this.DTOController.password) ||
         validateThis.isEmpty(this.DTOController.passwordconfirm) ||
-        validateThis.isEmpty(this.DTOController.businessRif)
+        validateThis.isEmpty(this.DTOController.numberdata) ||
+        validateThis.isEmpty(this.DTOController.controlUbicacion)||
+        validateThis.isEmpty(this.DTOController.category)
       ) {
         cursorNotification.notificationError(
           "Dejaste campos vacíos en el registro.",
@@ -62,12 +64,14 @@ export class AuthController {
         );
         return;
       }
+
       if (!validateThis.isEmail(this.DTOController.email)) {
         cursorNotification.notificationError(
           "El email introducido es inválido."
         );
         return;
       }
+
       const pattern = new RegExp("^[A-ZÑa-zñáéíóúÁÉÍÓÚ'° ]+$");
       if (!pattern.test(this.DTOController.name)) {
         cursorNotification.notificationError(
@@ -106,6 +110,7 @@ export class AuthController {
         );
         return;
       }
+
       await cursorServices.servicesHandleRegister(this.DTOController);
     } catch (err) {
       cursorNotification.notificationError(
@@ -113,6 +118,7 @@ export class AuthController {
         window.location,
         1
       );
+
       console.error(`Ha sucedido un error: ${err}`);
     }
   }
@@ -159,7 +165,10 @@ export class AuthController {
         );
         return;
       }
-      // Termina de validar los datos
+
+
+
+
       await cursorServices.servicesHandleRegisterUser(this.DTOController);
     }
   }

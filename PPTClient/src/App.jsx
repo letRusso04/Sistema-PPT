@@ -7,7 +7,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Homepage from "./ui/screen/auth/pages/Homepage";
 import Login from "./ui/screen/auth/pages/Login";
 import Register from "./ui/screen/auth/pages/Register";
-import UserControl from "./ui/screen/auth/pages/UserControl";
 
 //Links generales por parte del usuario.
 
@@ -39,10 +38,7 @@ function App() {
       path: "/registro",
       element: <Register />,
     },
-    {
-      path: "/usuarios",
-      element: <UserControl />,
-    },
+
     {
       path: "/dashboard",
       element: <Navigation />,
