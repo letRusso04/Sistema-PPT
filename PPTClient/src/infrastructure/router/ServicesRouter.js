@@ -10,7 +10,23 @@ export class GlobalAPIRouter {
         };
         this.routerMessage = {
             sendMessage: `${API}/mensajes/enviar`,
-            getMessage: `${API}/mensajes/buscar/miembro`, 
+            getMessage: `${API}/mensajes/buscar`, 
+        }
+        this.routerUser = {
+            callMember: `${API}/miembros/llamar`,
+            changePassword: `${API}/cambiarcontra`,
+            callImage:  `${API}/avatars/`,
+            ChangeImage:  `${API}/avatar/change`,
+            changeMember: `${API}/miembros/actualizar`,
+            deleteMember: `${API}/miembros/eliminar`,
+            acceptMember: `${API}/miembros/aprobar`,
+
+        }
+        this.auditoria = {
+            callAudit: `${API}/auditoria/llamar`,
+            callPost: `${API}/publicaciones/llamar`,
+            callImagePost: `${API}/publicaciones/imagen/`,
+            savePost: `${API}/publicaciones/guardar`
         }
     }
 }

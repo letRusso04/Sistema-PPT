@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // <-- importar
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/chat_provider.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:admin/env/api.dart';
 
 class MensajeriaScreen extends StatefulWidget {
   const MensajeriaScreen({Key? key}) : super(key: key);
@@ -15,7 +17,8 @@ class _MensajeriaScreenState extends State<MensajeriaScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _cargando = true;
-  String? _currentUserId; // <--- ID usuario actual
+  String? _currentUserId;
+  IO.Socket? socket;
 
   @override
   void initState() {
@@ -28,23 +31,53 @@ class _MensajeriaScreenState extends State<MensajeriaScreen> {
     final idUser = prefs.getInt('iduser')?.toString();
 
     if (idUser == null) {
-      // Manejar error o redirigir a login
       print("Usuario no autenticado");
       return;
     }
-    chatProvider.fetchMembers().whenComplete(() {
-      if (mounted) setState(() => _cargando = false);
-    });
+
     _currentUserId = idUser;
+
+    // Inicializar socket
+    socket = IO.io(baseUrl, {
+      'transports': ['websocket'],
+      'autoConnect': true,
+    });
+    socket!.connect();
+
+    socket!.onConnect((_) {
+      print("Socket conectado");
+      socket!.emit("join_room", idUser);
+    });
+
+    socket!.on("receive_message", (data) {
+      final senderId = data['sender']?.toString();
+      final text = data['text']?.toString();
+      if (senderId != null && text != null) {
+        chatProvider.receiveMessage(senderId, text);
+      }
+    });
+
+    socket!.onDisconnect((_) => print("Socket desconectado"));
+
     await chatProvider.fetchMembers();
-    if (mounted) setState(() => _cargando = false);
+    setState(() => _cargando = false);
   }
 
   void _sendMessage() {
     final text = _controller.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty ||
+        _currentUserId == null ||
+        chatProvider.selectedUserId == null) return;
+
     chatProvider.sendMessage(text, senderId: _currentUserId!);
     _controller.clear();
+
+    socket?.emit("send_message", {
+      "sender": _currentUserId,
+      "receiver": chatProvider.selectedUserId,
+      "text": text,
+      "timestamp": DateTime.now().toIso8601String(),
+    });
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
@@ -64,15 +97,14 @@ class _MensajeriaScreenState extends State<MensajeriaScreen> {
       child: _cargando
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-              // Filtramos miembros para excluir al usuario actual
               itemCount: chatProvider.members
                   .where((m) => m.id != _currentUserId)
                   .length,
               itemBuilder: (context, index) {
-                final filteredMembers = chatProvider.members
+                final members = chatProvider.members
                     .where((m) => m.id != _currentUserId)
                     .toList();
-                final member = filteredMembers[index];
+                final member = members[index];
                 final selected = member.id == chatProvider.selectedUserId;
                 final imgProvider = member.avatarPath.startsWith('http')
                     ? NetworkImage(member.avatarPath)
@@ -100,7 +132,7 @@ class _MensajeriaScreenState extends State<MensajeriaScreen> {
       value: chatProvider,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final bool isLargeScreen = constraints.maxWidth >= 600;
+          final isLargeScreen = constraints.maxWidth >= 600;
           return Scaffold(
             appBar: AppBar(
               title: const Text('Mensajería Interna'),
@@ -161,7 +193,6 @@ class _MensajeriaScreenState extends State<MensajeriaScreen> {
         final member =
             provider.members.firstWhere((m) => m.id == provider.selectedUserId);
         final messages = provider.messagesForSelectedUser;
-
         final imgProvider = member.avatarPath.startsWith('http')
             ? NetworkImage(member.avatarPath)
             : AssetImage(member.avatarPath) as ImageProvider;
@@ -245,6 +276,7 @@ class _MensajeriaScreenState extends State<MensajeriaScreen> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
+    socket?.dispose();
     super.dispose();
   }
 }

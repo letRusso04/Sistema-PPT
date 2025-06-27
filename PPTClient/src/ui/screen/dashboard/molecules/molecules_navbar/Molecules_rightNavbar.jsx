@@ -3,22 +3,24 @@ import styled from "styled-components";
 import Icon from "@mdi/react";
 import {
   mdiWindowClose,
-  mdiAccountCard,
-  mdiAccessPointCheck,
   mdiMessageOutline,
-  mdiRobotHappyOutline,
-  mdiBellCircleOutline,
-  mdiCogs,
-  mdiWrenchCogOutline,
-  mdiTrendingUp,
-  mdiProgressClose,
+  mdiAccountBoxOutline,
+  mdiProgressClose
 } from "@mdi/js";
+import { Session } from "bc-react-session";
 import { Hooks_Dashboard } from "../../../../../application/Hooks/Hooks_Dashboard";
-import icon_image from "../../../../../application/Assets/img/icon_main1.png";
+import icon_image from "../../../../../application/Assets/img/icon_hombre.png";
 import { NavLink } from "react-router-dom";
 import profile from "../../../../../application/Assets/img/icon_hombre.png";
+ import { GlobalAPIRouter } from "../../../../../infrastructure/router/ServicesRouter";
 
 function Molecules_rightNavbar(props) {
+  const sessionData = Session.get("user_information");
+  let imageUrl = sessionData.payload["user_image"];
+  let router = new GlobalAPIRouter();
+   const avatarURL = imageUrl
+      ? `${router.routerUser.callImage}${imageUrl}`
+      : icon_image;
   const { hooksAvailable, hooksOnResponse } = Hooks_Dashboard();
   return (
     <Organism_SelectStyles>
@@ -27,7 +29,7 @@ function Molecules_rightNavbar(props) {
         style={{ zIndex: hooksOnResponse.onResponseRightNavbar() ? "10" : "0" }}
       >
         <img
-          src={profile}
+          src={avatarURL}
           onClick={() => hooksAvailable.onHandleSetRightNavbar(true)}
           style={{ margin: 5, cursor: "pointer" }}
         ></img>
@@ -46,7 +48,7 @@ function Molecules_rightNavbar(props) {
         >
           <div className="SelectOption__navbar-top">
             <div className="SelectOption__navbar-topProfile">
-              <img src={profile} style={{ opacity: 0.8 }}></img>
+              <img src={avatarURL} style={{ opacity: 0.8 }}></img>
               <div className="navbar__topProfile-userData">
                 <h1>Patria Para Todos</h1>
                 <div className="topProfile__userData-states">
@@ -55,26 +57,44 @@ function Molecules_rightNavbar(props) {
                 </div>
               </div>
             </div>
-            <Icon
-              onClick={() => hooksAvailable.onHandleSetRightNavbar(true)}
-              style={{ margin: 10, cursor: "pointer" }}
-              path={mdiWindowClose}
-              size={1}
-            ></Icon>
+   
+   
           </div>
           <div className="SelectOption__navbar-main">
-            {props.traceRouter.map(({ icon, labelName, router, category, separator }) => (
-              <>
-                {category.labelVisible != false && <p>{category.labelName}</p>}
-                <div className="LinkContainer" key={labelName}>
-                  <NavLink to={router} className="List-selection">
-                    <div className="Linkicon">{icon}</div>
-                    <span>{labelName}</span>
-                  </NavLink>
-                </div>
-                {separator && <hr></hr>}
-              </>
-            ))}
+
+            <div className="LinkContainer" key={"0"}>
+              <NavLink to="/dashboard/micuenta" className="List-selection">
+                <div className="Linkicon">  <Icon
+                  path={mdiAccountBoxOutline}
+                  size={1.2}
+                  className="icon_style"
+                ></Icon></div>
+                <span>Mi cuenta</span>
+              </NavLink>
+            </div>
+            <div className="LinkContainer" key={"0"}>
+              <NavLink to="/dashboard/mensajes" className="List-selection">
+                <div className="Linkicon">  <Icon
+                  path={mdiMessageOutline}
+                  size={1.2}
+                  className="icon_style"
+                ></Icon></div>
+                <span>Mensajeria</span>
+              </NavLink>
+            </div>
+                 <hr></hr>
+            <div className="LinkContainer" key={"0"}>
+              <NavLink to="/dashboard/salir" className="List-selection">
+                <div className="Linkicon">  <Icon
+                  path={mdiProgressClose}
+                  size={1.2}
+                  className="icon_style"
+                ></Icon></div>
+                <span>Desconectar</span>
+              </NavLink>
+            </div>
+       
+
           </div>
           <div className="SelectOption__navbar-bottom">
             <p style={{ fontSize: 10, cursor: "pointer" }}>
@@ -86,7 +106,24 @@ function Molecules_rightNavbar(props) {
     </Organism_SelectStyles>
   );
 }
+/*
+export const navigationRightRouter = [
+ 
 
+},
+{
+labelName: "Desconectar",
+icon: <Icon path={mdiProgressClose} size={1}></Icon>,
+router: "",
+separator: 0,
+category: {
+labelVisible: false,
+labelName: "Desconecion",
+permissions: false,
+},
+},
+];
+ */
 const Organism_SelectStyles = styled.div`
 
   .block__screen {

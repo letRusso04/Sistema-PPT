@@ -3,8 +3,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { GlobalAPIRouter } from "../router/ServicesRouter";
 import { v4 as uuid } from "uuid";
 import { GenerateNotification } from "../../application/Utilities/ToastAlert";
-import { useDispatch } from "react-redux";
-import { addMessage } from "../../domain/redux/Slices/MessageBot";
+
 const session = Session.get("user_information");
 let user_id = session.payload["user_id"];
 let cursorNotification = new GenerateNotification();

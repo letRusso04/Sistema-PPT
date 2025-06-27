@@ -13,13 +13,19 @@ import {
   mdiChartBarStacked,
   mdiStorefront,
   mdiCardAccountDetailsOutline,
+  mdiNotePlus
 } from "@mdi/js";
 import { Hooks_Dashboard } from "../../../../../application/Hooks/Hooks_Dashboard";
 import icon_image from "../../../../../application/Assets/img/icon_main.png";
 import { NavLink } from "react-router-dom";
+import { Session } from "bc-react-session";  // <-- Importamos session
+
 function Molecules_leftNavbar(props) {
   const { hooksAvailable, hooksOnResponse } = Hooks_Dashboard();
- 
+
+  // Obtener sesión y verificar si es admin
+  const session = Session.get("user_information");
+  const user_admin = session.payload["user_admin"];
   return (
     <Organism_SelectOptionStyles>
       <div className="container__SelectOption">
@@ -28,12 +34,12 @@ function Molecules_leftNavbar(props) {
           style={{ margin: 5, cursor: "pointer" }}
           path={mdiReorderHorizontal}
           size={1.2}
-        ></Icon>
+        />
         {hooksOnResponse.onResponseNavbar() && (
           <div
             onClick={() => hooksAvailable.onHandleSetNavbar(true)}
             className="block__screen"
-          ></div>
+          />
         )}
         <div
           style={{
@@ -43,35 +49,63 @@ function Molecules_leftNavbar(props) {
           className="container__SelectOption-navbar"
         >
           <div className="SelectOption__navbar-top">
-            <img src={icon_image} style={{ opacity: 0.8, height: "30px" }}></img>
+            <img src={icon_image} style={{ opacity: 0.8, height: "30px" }} alt="Logo" />
             <Icon
               onClick={() => hooksAvailable.onHandleSetNavbar(true)}
               style={{ margin: 10, cursor: "pointer" }}
               path={mdiWindowClose}
               size={1}
-            ></Icon>
+            />
           </div>
           <div className="SelectOption__navbar-main">
-            {props.traceRouter.map(({ icon, labelName, router, category, separator }) => (
-              <>
-                {category.labelVisible != false && <p>{category.labelName}</p>}
-                <div className="LinkContainer" key={labelName}>
-                  <NavLink to={router} className="List-selection">
-                    <div className="Linkicon">{icon}</div>
-                    <span>{labelName}</span>
-                  </NavLink>
-                </div>
-                {separator && <hr></hr>}
-              </>
-            ))}
+            <div className="LinkContainer" key="0">
+              <NavLink to="/dashboard/home" className="List-selection">
+                <div className="Linkicon"><Icon path={mdiHomeOutline} size={1} /></div>
+                <span>Principal</span>
+              </NavLink>
+            </div>
+            <div className="LinkContainer" key="1">
+              <NavLink to="/dashboard/registro/miembros" className="List-selection">
+                <div className="Linkicon"><Icon path={mdiStorefront} size={1} /></div>
+                <span>Registro</span>
+              </NavLink>
+            </div>
+
+            {/* Mostrar auditoría solo si es admin */}
+            {Boolean(user_admin) && (
+              <div className="LinkContainer" key="2">
+                <NavLink to="/dashboard/auditoria" className="List-selection">
+                  <div className="Linkicon"><Icon path={mdiClipboardListOutline} size={1} /></div>
+                  <span>Auditoria</span>
+                </NavLink>
+              </div>
+            )}
+
+            <div className="LinkContainer" key="3">
+              <NavLink to="/dashboard/novedades" className="List-selection">
+                <div className="Linkicon"><Icon path={mdiChartBarStacked} size={1} /></div>
+                <span>Eventos</span>
+              </NavLink>
+            </div>
+
+            {/* Mostrar Crear Publicacion solo si es admin */}
+  {Boolean(user_admin) && (
+  <div className="LinkContainer" key="4">
+    <NavLink to="/dashboard/crearpublicacion" className="List-selection">
+      <div className="Linkicon"><Icon path={mdiNotePlus} size={1} /></div>
+      <span>Crear Publicacion</span>
+    </NavLink>
+  </div>
+)}
+
+            <hr />
           </div>
           <div className="SelectOption__navbar-bottom">
             <p style={{ fontSize: 10 }}>
-              © 2025 PPT2025, Sofware de uso libre.
+              © 2025 PPT2025, Software de uso libre.
             </p>
             <p style={{ fontSize: 8 }}>
-              SISTEMA INFORMÁTICO PARA EL REGISTRO DE COMERCIALIZACIÓN DE
-              PRODUCTOS
+              SISTEMA INFORMÁTICO PARA EL REGISTRO DE PERSONAL
             </p>
           </div>
         </div>
@@ -168,4 +202,5 @@ const Organism_SelectOptionStyles = styled.div`
     }
   }
 `;
+
 export default Molecules_leftNavbar;

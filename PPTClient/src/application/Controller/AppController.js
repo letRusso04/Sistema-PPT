@@ -4,7 +4,7 @@ import {
 } from "../../infrastructure/services/AppServices";
 import { Session } from "bc-react-session";
 import { GenerateNotification } from "../../application/Utilities/ToastAlert";
-import { BusinessRepository, ProductRepository, ClientRepositoryServices} from "../../infrastructure/Repository/BusinessRepository";
+import { FecthRepository, ClientRepositoryServices} from "../../infrastructure/Repository/fetchRepository";
 const cursorServices = new AppServices();
 const getcursorServices = new AppGetContent();
 const cursorNotification = new GenerateNotification();
@@ -72,102 +72,25 @@ export class AppGetDataController {
     }
   }
 }
-let cursorBusinessRepository = new BusinessRepository();
-export class BusinessControllerRepository {
+let cursorFecthRepository = new FecthRepository();
+export class UserControllerRepository {
   constructor() {}
   async controllerCreateBusiness(DTOData) {
     try {
-      await cursorBusinessRepository.servicesCreateBusiness(DTOData);
+      await cursorFecthRepository.servicesCreateBusiness(DTOData);
     } catch (err) {
       console.error(`Ha sucedido un error: ${err}`);
     }
   }
-  async controllerCallBusines(userId) {
+  async controllerCallUser(userId) {
     try {
-      return await cursorBusinessRepository.servicesGetBussines(userId);
+      return await cursorFecthRepository.servicesGetUser(userId);
     } catch (err) {
       cursorNotification.notificationError(
         "El proceso ha fallado, intenta más tarde.",
         window.location,
         1
       );
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-}
-let cursorProduct = new ProductRepository();
-export class ProductControllerRepository{
-  constructor() {}
-  async controllerCreateProduct(DTOData) {
-    try {
-      await cursorProduct.servicesCreateProduct(DTOData);
-    } catch (err) {
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-  async controllerCallProduct(DTOData) {
-    try {
-      return await cursorProduct.servicesGetProduct(DTOData);
-    } catch (err) {
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-  async controllerCallProductID(DTOData) {
-    try {
-      return await cursorProduct.servicesGetProductID(DTOData);
-    } catch (err) {
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-  async controllerChangeProduct(DTOData) {
-    try {
-      return await cursorProduct.servicesChangeProduct(DTOData);
-    } catch (err) {
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-  async controllerDeleteProduct(DTOData) {
-    try {
-      return await cursorProduct.servicesDeleteProduct(DTOData);
-    } catch (err) {
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-}
-let cursorClient = new ClientRepositoryServices();
-export class ClientControllerRepository{
-  async controllerCreateClient(DTOData) {
-    try {
-      await cursorClient.servicesCreateClient(DTOData);
-    } catch (err) {
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-  async controllerCallClient(DTOData) {
-    try {
-      return await cursorClient.servicesGetClient(DTOData);
-    } catch (err) {
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-  async controllerCallClientID(DTOData) {
-    try {
-      return await cursorClient.servicesGetClientID(DTOData);
-    } catch (err) {
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-  async controllerChangeClient(DTOData) {
-    try {
-      return await cursorClient.servicesChangeClient(DTOData);
-    } catch (err) {
-      console.error(`Ha sucedido un error: ${err}`);
-    }
-  }
-  async controllerDeleteClient(DTOData) {
-    try {
-      return await cursorClient.servicesDeleteClient(DTOData);
-    } catch (err) {
       console.error(`Ha sucedido un error: ${err}`);
     }
   }
