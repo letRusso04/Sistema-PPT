@@ -1,6 +1,5 @@
 from database.danQuery import database_load
 import time
-from services.danEmailServices import DanEmailServices
 from Interface.modelInterface import ModelInterface
 class AuthModels:
     async def modelAuth(email,password):

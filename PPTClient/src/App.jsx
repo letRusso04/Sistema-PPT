@@ -12,8 +12,7 @@ import Register from "./ui/screen/auth/pages/Register";
 
 import Navigation from "./ui/screen/dashboard/pages/Navigation";
 import Home from "./ui/screen/dashboard/pages/pages_business/Home";
-import Customer from "./ui/screen/dashboard/pages/pages_business/Customer";
-import Inventory from "./ui/screen/dashboard/pages/pages_business/Inventory";
+import UserList from "./ui/screen/dashboard/pages/pages_business/UsersList";
 import News from "./ui/screen/dashboard/pages/pages_business/News";
 import Chat from "./ui/screen/dashboard/pages/pages_user/Chat";
 import Audit from "./ui/screen/dashboard/pages/pages_business/Audit";
@@ -24,6 +23,7 @@ import Logout from "./ui/screen/dashboard/pages/pages_user/Logout";
 
 import { Organism_preview } from "./ui/screen/dashboard/organisms/organism_registro/organism_preview";
 import { Organism_verif } from "./ui/screen/dashboard/organisms/organism_registro/organism_verif";
+import { PublicacionScreen } from "./ui/screen/dashboard/pages/pages_business/CPost";
 function App() {
   const router = createBrowserRouter([
     {
@@ -38,7 +38,6 @@ function App() {
       path: "/registro",
       element: <Register />,
     },
-
     {
       path: "/dashboard",
       element: <Navigation />,
@@ -57,8 +56,12 @@ function App() {
           element: <Audit />,
         },
         {
+          path: "crearpublicacion",
+          element: <PublicacionScreen/>
+        },
+        {
           path: "registro",
-          element: <Customer />,
+          element: <UserList />,
           children: [
             {
               path: "miembros",
@@ -107,66 +110,10 @@ function App() {
             }
           ]
         },
-
-        {
-          path: "Grupos",
-          element: <Inventory />,
-          children: [
-            {
-              path: "almacen",
-              children: [
-                {
-                  path: ":isInventory"
-                }
-              ]
-            },
-            {
-              path: "producto",
-              children: [
-                {
-                  path: "nuevo",
-                  children:[
-                    {
-                      path: ":newProduct"
-                    }
-                  ]
-                },
-                {
-                  path: ":isInventory",
-                  children:[
-                    {
-                      path: ":showProduct"
-                    }
-                  ]
-                },
-                {
-                  path: "eliminar",
-                  children:[
-                    {
-                      path: ":deleteProduct"
-                    }
-                  ]
-                },
-                {
-                  path: "editar",
-                  children:[
-                    {
-                      path: ":editProduct"
-                    }
-                  ]
-                }
-
-
-              ]
-            }
-          ]
-        },
         {
           path: "novedades",
           element: <News />,
         },
-
-
         {
           path: "micuenta",
           element: <Account />,

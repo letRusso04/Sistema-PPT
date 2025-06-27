@@ -27,14 +27,17 @@ class MemberModel:
 
     async def modelKickMember(iduser):
         try:
-            (connect, query)= await database_load()
-            query.execute(f"DELETE FROM db_main WHERE us_pk = '{iduser}'")
+            connect, query = await database_load()
+            # Elimina mensajes donde el usuario aparece como emisor o receptor
+            query.execute("DELETE FROM db_message WHERE fg_user = %s OR fg_touser = %s", (iduser, iduser))
+            # Elimina el usuario de db_main
+            query.execute("DELETE FROM db_main WHERE us_pk = %s", (iduser,))
             connect.commit()
-        except:
-            DTOData = ModelInterface("BAD_QUERY_RESPONSE")
-            return DTOData    
-        DTOData = ModelInterface("DELETE_QUERY_RESPONSE")
-        return DTOData     
+        except Exception as e:
+            print("ERROR:", e)
+            return ModelInterface("BAD_QUERY_RESPONSE")
+        
+        return ModelInterface("DELETE_QUERY_RESPONSE")
                    
     async def modelChangeMember(iduser, rol, correo, cedula, estado, ubicacion, telefono):
         try:

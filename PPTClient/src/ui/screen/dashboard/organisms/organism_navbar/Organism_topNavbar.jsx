@@ -6,35 +6,23 @@ import { Link } from "react-router-dom";
 import Icon from "@mdi/react";
 import { mdiBellCircle, mdiChat, mdiGithub } from "@mdi/js";
 import styled from "styled-components";
-import { GlobalActionsNavigation } from "../../../../../domain/Interface/Repository/NavigationRepository";
 import { navigationRightRouter, NavigationLeftRouter } from "../../../../../domain/Interface/local/NavigationModal";
+//        
 
 function Organism_topNavbar() {
-  let cursorNavigation = new GlobalActionsNavigation();
-  let createInterfaceRight = cursorNavigation.createNavigation(navigationRightRouter);
-  let createInterfaceLeft = cursorNavigation.createNavigation(NavigationLeftRouter);
+
   return (
     <Organism_topNavbarStyles>
       <div className="content_left">
-        <Molecules_leftNavbar traceRouter={createInterfaceLeft} />
-
+<Molecules_leftNavbar  />
         <Link to="/dashboard/home">
           <a className="content_left-textLabel">Dashboard</a>
         </Link>
       </div>
       <div className="content_right">
         <a>Patria Para Todos</a>
-        <Icon
-          style={{ margin: 5, color: "#aaa" }}
-          path={mdiChat}
-          size={1.2}
-        ></Icon>
-        <Icon
-          style={{ margin: 5, color: "#aaa" }}
-          path={mdiBellCircle}
-          size={1.2}
-        ></Icon>
-        <Molecules_rightNavbar traceRouter={createInterfaceRight} />
+      
+        <Molecules_rightNavbar  />
       </div>
     </Organism_topNavbarStyles>
   );

@@ -9,7 +9,11 @@ class Member {
   final String name;
   final String avatarPath;
 
-  Member({required this.id, required this.name, required this.avatarPath});
+  Member({
+    required this.id,
+    required this.name,
+    required this.avatarPath,
+  });
 
   factory Member.fromList(List<dynamic> data) {
     return Member(
@@ -20,6 +24,18 @@ class Member {
           : 'assets/images/PPTLogo.png',
     );
   }
+}
+
+class Message {
+  final String senderId;
+  final String text;
+  final DateTime time;
+
+  Message({
+    required this.senderId,
+    required this.text,
+    required this.time,
+  });
 }
 
 class ChatProvider extends ChangeNotifier {
@@ -52,7 +68,7 @@ class ChatProvider extends ChangeNotifier {
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'from_id': myId, 'to_id': userId}),
           )
-          .timeout(Duration(seconds: 10));
+          .timeout(const Duration(seconds: 10));
 
       if (res.statusCode != 200) {
         throw Exception('Error ${res.statusCode}');
@@ -79,12 +95,13 @@ class ChatProvider extends ChangeNotifier {
     final newMsg =
         Message(senderId: senderId, text: text, time: DateTime.now());
 
-    // Agrega localmente mientras llega al servidor
     _messages.putIfAbsent(_selectedUserId!, () => []);
     _messages[_selectedUserId!]!.add(newMsg);
     notifyListeners();
+
     final prefs = await SharedPreferences.getInstance();
     final currentUserId = prefs.getInt('iduser')?.toString() ?? '0';
+
     try {
       final url = Uri.parse('$baseUrl/mensajes/enviar');
       final response = await http
@@ -108,11 +125,20 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  void receiveMessage(String userId, String text) {
-    final newMsg = Message(senderId: userId, text: text, time: DateTime.now());
-    _messages.putIfAbsent(userId, () => []);
-    _messages[userId]!.add(newMsg);
-    notifyListeners();
+  void receiveMessage(String senderId, String text) {
+    final newMsg = Message(
+      senderId: senderId,
+      text: text,
+      time: DateTime.now(),
+    );
+
+    _messages.putIfAbsent(senderId, () => []);
+    _messages[senderId]!.add(newMsg);
+
+    // Si estamos chateando con ese usuario, actualizar también la UI
+    if (senderId == _selectedUserId) {
+      notifyListeners();
+    }
   }
 
   Future<void> fetchMembers() async {
@@ -130,7 +156,6 @@ class ChatProvider extends ChangeNotifier {
       _members
         ..clear()
         ..addAll(data.map<Member>((item) {
-          // Caso Map -----------------------------
           if (item is Map<String, dynamic>) {
             return Member(
               id: item['id'].toString(),
@@ -139,9 +164,8 @@ class ChatProvider extends ChangeNotifier {
             );
           }
 
-          // Caso List ----------------------------
           if (item is List && item.length >= 3) {
-            final int last = item.length - 1; // último índice válido
+            final int last = item.length - 1;
             final avatar = (item[last] ?? '').toString();
             return Member(
               id: item[0].toString(),
@@ -150,7 +174,6 @@ class ChatProvider extends ChangeNotifier {
             );
           }
 
-          // Formato inesperado -------------------
           if (kDebugMode) print('Item desconocido: $item');
           return Member(
             id: '0',
@@ -172,12 +195,4 @@ class ChatProvider extends ChangeNotifier {
     }
     return 'assets/images/PPTLogo.png';
   }
-}
-
-class Message {
-  final String senderId;
-  final String text;
-  final DateTime time;
-
-  Message({required this.senderId, required this.text, required this.time});
 }

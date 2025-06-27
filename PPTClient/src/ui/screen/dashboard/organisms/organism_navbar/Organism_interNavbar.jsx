@@ -2,34 +2,24 @@ import React from "react";
 import styled from "styled-components";
 import user_panel from "../../../../../application/Assets/img/icon_hombre.png";
 import Molecules_selection from "../../molecules/molecules_display/Molecules_selection";
+import { mdiAccount, mdiAccountArrowUp } from "@mdi/js";
 function Organism_interNavbar(props) {
   return (
     <Organism_interNavbarStyle>
       <div className="content__interNavbar-hover">
         <div className="container_selection">
-          {props.InterfaceList &&
-            props.InterfaceList.map(({ icon, labelName, router, active }) => (
               <Molecules_selection
-                Icon={icon}
-                labelName={labelName}
-                Router={router}
-                active={active}
+                Icon={mdiAccount}
+                labelName="Usuario"
+                Router="/dashboard/registro/miembros"
+                active={true}
               />
-            ))}
-        </div>
-        <div className="container_settings">
-          {props.InterfaceSettings &&
-            props.InterfaceSettings.map(
-              ({ icon, labelName, router, active }) => (
-                <Molecules_selection
-                  Icon={icon}
-                  labelName={labelName}
-                  Router={router}
-                  active={active}
-                />
-              )
-            )}
-       
+              <Molecules_selection
+                Icon={mdiAccountArrowUp}
+                labelName="Registro"
+                Router="/dashboard/registro/verificacion"
+                active={true}
+              />
         </div>
       </div>
     </Organism_interNavbarStyle>
@@ -38,7 +28,7 @@ function Organism_interNavbar(props) {
 
 const Organism_interNavbarStyle = styled.div`
   width: 100%;
-  height: 90vh;
+  height: 100vh;
   background:#969697;
     border-right: 2px solid rgba(80, 80, 80, 0.6);
   display: flex;
